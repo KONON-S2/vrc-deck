@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html><head lang="en"><title>Expression Cycle</title><meta charset="utf-8" />
+<script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script></head>
+<body>
+<sdpi-item label="Parameter"><input data-expression-parameter list="expression-parameter-options" placeholder="Search parameters..." autocomplete="off" /></sdpi-item>
+<datalist id="expression-parameter-options"></datalist>
+<sdpi-item label="Maximum"><sdpi-textfield setting="cycleMax" type="number" min="0" max="255" default="7"></sdpi-textfield></sdpi-item>
+<script src="expression-parameters.js"></script>
+</body></html>

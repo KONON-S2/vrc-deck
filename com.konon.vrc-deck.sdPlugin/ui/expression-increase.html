@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html><head lang="en"><title>Expression Increase</title><meta charset="utf-8" />
+<script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+<style>
+.change-control { display: flex; align-items: center; gap: 8px; width: 100%; }
+.change-value { flex: 0 0 58px; min-width: 0; box-sizing: border-box; color: #fff; background: #3a3a3a; border: 1px solid #555; border-radius: 3px; padding: 5px 6px; text-align: center; }
+.change-slider { flex: 1 1 auto; min-width: 0; margin: 0; }
+</style></head>
+<body>
+<sdpi-item label="Parameter"><input data-expression-parameter list="expression-parameter-options" placeholder="Search parameters..." autocomplete="off" /></sdpi-item>
+<datalist id="expression-parameter-options"></datalist>
+<sdpi-item label="Change (0-1)"><div class="change-control"><input class="change-value" type="text" inputmode="decimal" value="0.10" aria-label="Change amount" /><input class="change-slider" type="range" min="0" max="1" step="0.01" value="0.1" aria-label="Change amount slider" /></div></sdpi-item>
+<script src="expression-parameters.js"></script>
+<script src="expression-change.js"></script>
+</body></html>

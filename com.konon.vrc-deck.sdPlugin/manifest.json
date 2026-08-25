@@ -1,0 +1,244 @@
+{
+    "Name": "VRC Deck",
+    "Version": "0.1.0.0",
+    "Author": "KONON",
+    "Actions": [
+        {
+            "Name": "Counter",
+            "UUID": "com.konon.vrc-deck.increment",
+            "Icon": "imgs/actions/counter/icon",
+            "Tooltip": "Displays a count, which increments by one on press.",
+            "PropertyInspectorPath": "ui/increment-counter.html",
+            "Controllers": [
+                "Keypad"
+            ],
+            "States": [
+                {
+                    "Image": "imgs/actions/counter/key",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        },
+        {
+            "Name": "OSC Test",
+            "UUID": "com.konon.vrc-deck.osc-test",
+            "Icon": "imgs/actions/counter/icon",
+            "Tooltip": "Sends a test OSC parameter to VRChat.",
+            "Controllers": [
+                "Keypad"
+            ],
+            "States": [
+                {
+                    "Image": "imgs/actions/counter/key",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        },
+		{
+		"Name": "Mic Toggle",
+		"UUID": "com.konon.vrc-deck.mic-toggle",
+		"Icon": "imgs/actions/counter/icon",
+		"Tooltip": "Toggle your VRChat microphone and display its current state.",
+		"PropertyInspectorPath": "ui/mic-toggle.html",
+		"Controllers": [
+			"Keypad"
+		],
+		"States": [
+			{
+				"Image": "imgs/actions/counter/key",
+				"Title": "MIC ON",
+				"TitleAlignment": "middle"
+			},
+			{
+				"Image": "imgs/actions/counter/key",
+				"Title": "MIC OFF",
+				"TitleAlignment": "middle"
+			}
+		]
+	},
+        {
+            "Name": "AFK Status",
+            "UUID": "com.konon.vrc-deck.afk-toggle",
+            "Icon": "imgs/actions/counter/icon",
+            "Tooltip": "Display the current VRChat AFK state.",
+            "PropertyInspectorPath": "ui/afk-status.html",
+            "Controllers": ["Keypad"],
+            "States": [
+                {
+                    "Image": "imgs/actions/counter/key",
+                    "Title": "AFK OFF",
+                    "TitleAlignment": "middle"
+                },
+                {
+                    "Image": "imgs/actions/counter/key",
+                    "Title": "AFK ON",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        },
+        {
+            "Name": "VRC Login",
+            "UUID": "com.konon.vrc-deck.vrc-login",
+            "Icon": "imgs/actions/counter/icon",
+            "Tooltip": "Sign in to VRChat for VRC Deck API features.",
+            "PropertyInspectorPath": "ui/vrc-login.html",
+            "Controllers": ["Keypad"],
+            "States": [
+                {
+                    "Image": "imgs/actions/counter/key",
+                    "Title": "VRC\nLOGIN",
+                    "TitleAlignment": "middle"
+                },
+                {
+                    "Image": "imgs/actions/counter/key",
+                    "Title": "VRC\nLOGGED IN",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        },
+        {
+            "Name": "Instance Status",
+            "UUID": "com.konon.vrc-deck.instance-status",
+            "Icon": "imgs/actions/counter/icon",
+            "Tooltip": "Display current and maximum users in the active VRChat instance.",
+            "Controllers": ["Keypad"],
+            "States": [
+                {
+                    "Image": "imgs/actions/counter/key",
+                    "Title": "-- / --",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        },
+        {
+            "Name": "Avatar Change",
+            "UUID": "com.konon.vrc-deck.avatar-change",
+            "Icon": "imgs/actions/counter/icon",
+            "Tooltip": "Select and switch to a VRChat avatar.",
+            "PropertyInspectorPath": "ui/avatar-change.html",
+            "Controllers": ["Keypad"],
+            "States": [
+                {
+                    "Image": "imgs/actions/counter/key",
+                    "Title": "Avatar",
+                    "TitleAlignment": "bottom"
+                }
+            ]
+        },
+        {
+            "Name": "Online Status",
+            "UUID": "com.konon.vrc-deck.online-status",
+            "Icon": "imgs/actions/counter/icon",
+            "Tooltip": "Cycle, toggle, or set your VRChat online status.",
+            "PropertyInspectorPath": "ui/online-status.html",
+            "Controllers": ["Keypad"],
+            "States": [
+                { "Image": "imgs/actions/online-status/online", "Title": "ONLINE", "TitleAlignment": "bottom" }
+            ]
+        },
+        {
+            "Name": "Expression Toggle",
+            "UUID": "com.konon.vrc-deck.expression-toggle",
+            "Icon": "imgs/actions/counter/icon",
+            "Tooltip": "Toggle a VRChat avatar expression parameter.",
+            "PropertyInspectorPath": "ui/expression-toggle.html",
+            "Controllers": ["Keypad"],
+            "States": [
+                {
+                    "Image": "imgs/actions/counter/key",
+                    "Title": "OFF",
+                    "TitleAlignment": "middle"
+                },
+                {
+                    "Image": "imgs/actions/counter/key",
+                    "Title": "ON",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        },
+        {
+            "Name": "Expression Button",
+            "UUID": "com.konon.vrc-deck.expression-button",
+            "Icon": "imgs/actions/counter/icon",
+            "Tooltip": "Set a VRChat avatar expression parameter to a configured value.",
+            "PropertyInspectorPath": "ui/expression-button.html",
+            "Controllers": ["Keypad"],
+            "States": [
+                {
+                    "Image": "imgs/actions/counter/key",
+                    "Title": "Button",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        },
+        {
+            "Name": "Expression Cycle",
+            "UUID": "com.konon.vrc-deck.expression-cycle",
+            "Icon": "imgs/actions/counter/icon",
+            "Tooltip": "Cycle an expression parameter from zero to a maximum value.",
+            "PropertyInspectorPath": "ui/expression-cycle.html",
+            "Controllers": ["Keypad"],
+            "States": [
+                {
+                    "Image": "imgs/actions/counter/key",
+                    "Title": "Cycle",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        },
+        {
+            "Name": "Expression Increase",
+            "UUID": "com.konon.vrc-deck.expression-increase",
+            "Icon": "imgs/actions/counter/icon",
+            "Tooltip": "Increase a VRChat avatar expression parameter.",
+            "PropertyInspectorPath": "ui/expression-increase.html",
+            "Controllers": ["Keypad"],
+            "States": [
+                {
+                    "Image": "imgs/actions/counter/key",
+                    "Title": "+",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        },
+        {
+            "Name": "Expression Decrease",
+            "UUID": "com.konon.vrc-deck.expression-decrease",
+            "Icon": "imgs/actions/counter/icon",
+            "Tooltip": "Decrease a VRChat avatar expression parameter.",
+            "PropertyInspectorPath": "ui/expression-decrease.html",
+            "Controllers": ["Keypad"],
+            "States": [
+                {
+                    "Image": "imgs/actions/counter/key",
+                    "Title": "-",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        }
+    ],
+    "Category": "VRC Deck",
+    "CategoryIcon": "imgs/plugin/category-icon",
+    "CodePath": "bin/plugin.js",
+    "Description": "Control and monitor VRChat directly from your Stream Deck using OSC.",
+    "Icon": "imgs/plugin/marketplace",
+    "SDKVersion": 3,
+    "Software": {
+        "MinimumVersion": "7.1"
+    },
+    "OS": [
+        {
+            "Platform": "mac",
+            "MinimumVersion": "12"
+        },
+        {
+            "Platform": "windows",
+            "MinimumVersion": "10"
+        }
+    ],
+    "Nodejs": {
+        "Version": "24",
+        "Debug": "enabled"
+    },
+    "UUID": "com.konon.vrc-deck"
+}
