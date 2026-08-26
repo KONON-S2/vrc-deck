@@ -1,6 +1,6 @@
 {
     "Name": "VRC Deck",
-    "Version": "0.1.0.0",
+    "Version": "0.1.0.1",
     "Author": "KONON",
     "Actions": [
         {
@@ -34,35 +34,37 @@
                 }
             ]
         },
-		{
-		"Name": "Mic Toggle",
-		"UUID": "com.konon.vrc-deck.mic-toggle",
-		"Icon": "imgs/actions/counter/icon",
-		"Tooltip": "Toggle your VRChat microphone and display its current state.",
-		"PropertyInspectorPath": "ui/mic-toggle.html",
-		"Controllers": [
-			"Keypad"
-		],
-		"States": [
-			{
-				"Image": "imgs/actions/counter/key",
-				"Title": "MIC ON",
-				"TitleAlignment": "middle"
-			},
-			{
-				"Image": "imgs/actions/counter/key",
-				"Title": "MIC OFF",
-				"TitleAlignment": "middle"
-			}
-		]
-	},
+        {
+            "Name": "Mic Toggle",
+            "UUID": "com.konon.vrc-deck.mic-toggle",
+            "Icon": "imgs/actions/counter/icon",
+            "Tooltip": "Toggle your VRChat microphone and display its current state.",
+            "PropertyInspectorPath": "ui/mic-toggle.html",
+            "Controllers": [
+                "Keypad"
+            ],
+            "States": [
+                {
+                    "Image": "imgs/actions/counter/key",
+                    "Title": "MIC ON",
+                    "TitleAlignment": "middle"
+                },
+                {
+                    "Image": "imgs/actions/counter/key",
+                    "Title": "MIC OFF",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        },
         {
             "Name": "AFK Status",
             "UUID": "com.konon.vrc-deck.afk-toggle",
             "Icon": "imgs/actions/counter/icon",
             "Tooltip": "Display the current VRChat AFK state.",
             "PropertyInspectorPath": "ui/afk-status.html",
-            "Controllers": ["Keypad"],
+            "Controllers": [
+                "Keypad"
+            ],
             "States": [
                 {
                     "Image": "imgs/actions/counter/key",
@@ -82,7 +84,9 @@
             "Icon": "imgs/actions/counter/icon",
             "Tooltip": "Sign in to VRChat for VRC Deck API features.",
             "PropertyInspectorPath": "ui/vrc-login.html",
-            "Controllers": ["Keypad"],
+            "Controllers": [
+                "Keypad"
+            ],
             "States": [
                 {
                     "Image": "imgs/actions/counter/key",
@@ -101,7 +105,9 @@
             "UUID": "com.konon.vrc-deck.instance-status",
             "Icon": "imgs/actions/counter/icon",
             "Tooltip": "Display current and maximum users in the active VRChat instance.",
-            "Controllers": ["Keypad"],
+            "Controllers": [
+                "Keypad"
+            ],
             "States": [
                 {
                     "Image": "imgs/actions/counter/key",
@@ -116,7 +122,9 @@
             "Icon": "imgs/actions/counter/icon",
             "Tooltip": "Select and switch to a VRChat avatar.",
             "PropertyInspectorPath": "ui/avatar-change.html",
-            "Controllers": ["Keypad"],
+            "Controllers": [
+                "Keypad"
+            ],
             "States": [
                 {
                     "Image": "imgs/actions/counter/key",
@@ -131,9 +139,15 @@
             "Icon": "imgs/actions/counter/icon",
             "Tooltip": "Cycle, toggle, or set your VRChat online status.",
             "PropertyInspectorPath": "ui/online-status.html",
-            "Controllers": ["Keypad"],
+            "Controllers": [
+                "Keypad"
+            ],
             "States": [
-                { "Image": "imgs/actions/online-status/online", "Title": "ONLINE", "TitleAlignment": "bottom" }
+                {
+                    "Image": "imgs/actions/online-status/online",
+                    "Title": "ONLINE",
+                    "TitleAlignment": "bottom"
+                }
             ]
         },
         {
@@ -142,7 +156,9 @@
             "Icon": "imgs/actions/counter/icon",
             "Tooltip": "Toggle a VRChat avatar expression parameter.",
             "PropertyInspectorPath": "ui/expression-toggle.html",
-            "Controllers": ["Keypad"],
+            "Controllers": [
+                "Keypad"
+            ],
             "States": [
                 {
                     "Image": "imgs/actions/counter/key",
@@ -162,7 +178,9 @@
             "Icon": "imgs/actions/counter/icon",
             "Tooltip": "Set a VRChat avatar expression parameter to a configured value.",
             "PropertyInspectorPath": "ui/expression-button.html",
-            "Controllers": ["Keypad"],
+            "Controllers": [
+                "Keypad"
+            ],
             "States": [
                 {
                     "Image": "imgs/actions/counter/key",
@@ -177,7 +195,9 @@
             "Icon": "imgs/actions/counter/icon",
             "Tooltip": "Cycle an expression parameter from zero to a maximum value.",
             "PropertyInspectorPath": "ui/expression-cycle.html",
-            "Controllers": ["Keypad"],
+            "Controllers": [
+                "Keypad"
+            ],
             "States": [
                 {
                     "Image": "imgs/actions/counter/key",
@@ -192,7 +212,9 @@
             "Icon": "imgs/actions/counter/icon",
             "Tooltip": "Increase a VRChat avatar expression parameter.",
             "PropertyInspectorPath": "ui/expression-increase.html",
-            "Controllers": ["Keypad"],
+            "Controllers": [
+                "Keypad"
+            ],
             "States": [
                 {
                     "Image": "imgs/actions/counter/key",
@@ -207,7 +229,9 @@
             "Icon": "imgs/actions/counter/icon",
             "Tooltip": "Decrease a VRChat avatar expression parameter.",
             "PropertyInspectorPath": "ui/expression-decrease.html",
-            "Controllers": ["Keypad"],
+            "Controllers": [
+                "Keypad"
+            ],
             "States": [
                 {
                     "Image": "imgs/actions/counter/key",
