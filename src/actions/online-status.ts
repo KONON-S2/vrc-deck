@@ -2,6 +2,7 @@ import streamDeck, {
     action,
     DidReceiveSettingsEvent,
     KeyDownEvent,
+    SendToPluginEvent,
     SingletonAction,
     WillAppearEvent,
     WillDisappearEvent
@@ -9,6 +10,7 @@ import streamDeck, {
 
 import { vrchatAuth, type VrchatOnlineStatus } from "../vrchat/auth";
 import { vrchatRealtime } from "../vrchat/realtime";
+import { showCheck } from "../icons/check";
 
 const STATUSES: VrchatOnlineStatus[] = [
     "join me",
@@ -31,6 +33,8 @@ type OnlineStatusSettings = {
     toggleStatusOne?: VrchatOnlineStatus;
     toggleStatusTwo?: VrchatOnlineStatus;
 };
+
+type OnlineStatusMessage = { event?: "getAuthStatus" };
 
 @action({ UUID: "com.konon.vrc-deck.online-status" })
 export class OnlineStatus extends SingletonAction<OnlineStatusSettings> {
@@ -57,6 +61,17 @@ export class OnlineStatus extends SingletonAction<OnlineStatusSettings> {
         await this.updateButton(ev.action);
     }
 
+    override async onSendToPlugin(
+        ev: SendToPluginEvent<OnlineStatusMessage, OnlineStatusSettings>
+    ): Promise<void> {
+        if (ev.payload.event === "getAuthStatus") {
+            await streamDeck.ui.sendToPropertyInspector({
+                event: "authStatus",
+                loggedIn: await vrchatAuth.isLoggedIn()
+            });
+        }
+    }
+
     override async onKeyDown(ev: KeyDownEvent<OnlineStatusSettings>): Promise<void> {
         try {
             const current = await vrchatAuth.getOnlineStatus(true);
@@ -78,7 +93,11 @@ export class OnlineStatus extends SingletonAction<OnlineStatusSettings> {
 
             this.currentStatus = await vrchatAuth.setOnlineStatus(next);
             await this.updateAllButtons();
-            await ev.action.showOk();
+            await showCheck(
+                ev.action,
+                this.getStatusImage(this.currentStatus),
+                () => this.updateButton(ev.action)
+            );
         } catch (error) {
             streamDeck.logger.error(
                 `[ONLINE STATUS] ${error instanceof Error ? error.message : String(error)}`
@@ -137,10 +156,15 @@ export class OnlineStatus extends SingletonAction<OnlineStatusSettings> {
 
     private async updateButton(actionInstance: any): Promise<void> {
         const visual = STATUS_VISUALS[this.currentStatus] ?? STATUS_VISUALS.active;
-        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144"><circle cx="72" cy="64" r="22" fill="${visual.color}"/></svg>`;
-        const image = `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+        const image = this.getStatusImage(this.currentStatus);
         await actionInstance.setState(0);
         await actionInstance.setImage(image);
         await actionInstance.setTitle(visual.title);
+    }
+
+    private getStatusImage(status: VrchatOnlineStatus): string {
+        const visual = STATUS_VISUALS[status] ?? STATUS_VISUALS.active;
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144"><circle cx="72" cy="64" r="22" fill="${visual.color}"/></svg>`;
+        return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
     }
 }

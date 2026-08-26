@@ -1,0 +1,7 @@
+VRChat is a trademark of VRChat Inc.
+
+VRC Deck is an unofficial third-party Stream Deck plugin. It is not affiliated
+with, endorsed by, sponsored by, or approved by VRChat Inc.
+
+The VRC Deck speech-bubble mark is an original project asset and is not the
+official VRChat logo.

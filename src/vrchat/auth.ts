@@ -10,6 +10,8 @@ type GlobalSettings = {
     vrchatSession?: string;
 };
 
+type AuthListener = (loggedIn: boolean) => void;
+
 type LoginResult = {
     status: "loggedIn" | "requires2fa";
     displayName?: string;
@@ -20,6 +22,9 @@ type CurrentUser = {
     id?: string;
     displayName?: string;
     status?: VrchatOnlineStatus;
+    currentAvatar?: string;
+    currentAvatarImageUrl?: string;
+    currentAvatarThumbnailImageUrl?: string;
     requiresTwoFactorAuth?: string[];
 };
 
@@ -29,6 +34,7 @@ export type VrchatInstanceInfo = {
     capacity: number;
     currentUsers: number;
     location: string;
+    thumbnailImageUrl?: string;
 };
 
 export type VrchatAvatar = {
@@ -41,6 +47,16 @@ class VrchatAuth {
     private cookieHeader = "";
     private currentUser: CurrentUser | undefined;
     private avatarCache: { expires: number; items: VrchatAvatar[] } | undefined;
+    private readonly authListeners = new Set<AuthListener>();
+
+    onAuthChanged(listener: AuthListener): () => void {
+        this.authListeners.add(listener);
+        return () => this.authListeners.delete(listener);
+    }
+
+    async isLoggedIn(): Promise<boolean> {
+        return await this.restore() !== undefined;
+    }
 
     async restore(): Promise<CurrentUser | undefined> {
         if (this.currentUser) {
@@ -150,12 +166,17 @@ class VrchatAuth {
             n_users?: number;
             userCount?: number;
             location?: string;
+            world?: {
+                thumbnailImageUrl?: string;
+                imageUrl?: string;
+            };
         }>(response);
 
         return {
             capacity: Number(instance.capacity ?? 0),
             currentUsers: Math.max(1, Number(instance.n_users ?? instance.userCount ?? 1)),
-            location: instance.location ?? location
+            location: instance.location ?? location,
+            thumbnailImageUrl: instance.world?.thumbnailImageUrl ?? instance.world?.imageUrl
         };
     }
 
@@ -188,6 +209,40 @@ class VrchatAuth {
             throw new Error("VRChat login is required.");
         }
         await this.request(`/avatars/${encodeURIComponent(avatarId)}/select`, { method: "PUT" });
+    }
+
+    async getCurrentAvatar(forceRefresh = false): Promise<VrchatAvatar> {
+        if (forceRefresh) {
+            if (!this.cookieHeader && !await this.restore()) {
+                throw new Error("VRChat login is required.");
+            }
+            this.currentUser = await this.getCurrentUser();
+        } else if (!await this.restore()) {
+            throw new Error("VRChat login is required.");
+        }
+
+        const avatarId = this.currentUser?.currentAvatar;
+        if (!avatarId) {
+            throw new Error("Current avatar was not found.");
+        }
+
+        const response = await this.request(`/avatars/${encodeURIComponent(avatarId)}`);
+        const avatar = await this.readJson<{
+            id?: string;
+            name?: string;
+            thumbnailImageUrl?: string;
+            imageUrl?: string;
+        }>(response);
+
+        return {
+            id: avatar.id ?? avatarId,
+            name: avatar.name ?? "Current Avatar",
+            thumbnailImageUrl: avatar.thumbnailImageUrl
+                ?? avatar.imageUrl
+                ?? this.currentUser?.currentAvatarThumbnailImageUrl
+                ?? this.currentUser?.currentAvatarImageUrl
+                ?? ""
+        };
     }
 
     async getOnlineStatus(forceRefresh = false): Promise<VrchatOnlineStatus> {
@@ -338,6 +393,7 @@ class VrchatAuth {
             ...settings,
             vrchatSession: this.encrypt(this.cookieHeader)
         });
+        this.notifyAuthChanged(true);
     }
 
     private async clearSession(): Promise<void> {
@@ -347,6 +403,19 @@ class VrchatAuth {
         const settings = await streamDeck.settings.getGlobalSettings<GlobalSettings>();
         const { vrchatSession: _removed, ...remaining } = settings;
         await streamDeck.settings.setGlobalSettings(remaining);
+        this.notifyAuthChanged(false);
+    }
+
+    private notifyAuthChanged(loggedIn: boolean): void {
+        for (const listener of this.authListeners) {
+            try {
+                listener(loggedIn);
+            } catch (error) {
+                streamDeck.logger.error(
+                    `[VRC LOGIN] Auth listener failed: ${error instanceof Error ? error.message : String(error)}`
+                );
+            }
+        }
     }
 
     private encryptionKey(): Buffer {

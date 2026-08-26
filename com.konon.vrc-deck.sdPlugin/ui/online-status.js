@@ -1,6 +1,9 @@
 window.addEventListener("DOMContentLoaded", async () => {
     const client = SDPIComponents.streamDeckClient;
     const modeSelect = document.querySelector("#status-mode");
+    const settingsPanel = document.querySelector("#online-settings");
+    const loginRequired = document.querySelector("#login-required");
+    let loggedIn = false;
 
     const setPickerDisabled = (setting, disabled) => {
         const picker = document.querySelector(`.status-picker[data-setting="${setting}"]`);
@@ -13,8 +16,16 @@ window.addEventListener("DOMContentLoaded", async () => {
     };
 
     const updateDisabledStates = (mode) => {
-        setPickerDisabled("toggleStatusOne", mode === "cycle");
-        setPickerDisabled("toggleStatusTwo", mode !== "toggle");
+        modeSelect.disabled = !loggedIn;
+        setPickerDisabled("toggleStatusOne", !loggedIn || mode === "cycle");
+        setPickerDisabled("toggleStatusTwo", !loggedIn || mode !== "toggle");
+    };
+
+    const applyAuthStatus = (isLoggedIn) => {
+        loggedIn = isLoggedIn;
+        settingsPanel.classList.toggle("login-disabled", !loggedIn);
+        loginRequired.style.display = loggedIn ? "none" : "block";
+        updateDisabledStates(modeSelect.value);
     };
 
     const current = await client.getSettings();
@@ -79,6 +90,12 @@ window.addEventListener("DOMContentLoaded", async () => {
             document.querySelectorAll(".status-picker.open").forEach((picker) => picker.classList.remove("open"));
         }
     });
+
+    client.sendToPropertyInspector.subscribe((ev) => {
+        if (ev.payload?.event === "authStatus") {
+            applyAuthStatus(Boolean(ev.payload.loggedIn));
+        }
+    });
     updateDisabledStates(modeSelect.value);
 
     const previewMode = (event) => {
@@ -94,4 +111,6 @@ window.addEventListener("DOMContentLoaded", async () => {
         const latest = await client.getSettings();
         await client.setSettings({ ...latest.settings, mode });
     });
+
+    await client.send("sendToPlugin", { event: "getAuthStatus" });
 });

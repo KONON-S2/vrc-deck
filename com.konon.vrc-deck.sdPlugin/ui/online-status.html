@@ -16,25 +16,30 @@
         .status-option { display: flex; align-items: center; gap: 7px; padding: 7px 8px; color: #fff; cursor: pointer; }
         .status-option:hover { background: #444; }
         .status-dot { display: inline-block; flex: 0 0 10px; width: 10px; height: 10px; border-radius: 50%; }
+        #online-settings.login-disabled { opacity: .38; pointer-events: none; }
+        #login-required { display: none; margin: 10px 8px 4px 72px; color: #ff6b6b; font: 600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.45; }
     </style>
 </head>
 <body>
-    <sdpi-item label="Mode">
-        <select id="status-mode">
-            <option value="cycle">Cycle</option>
-            <option value="toggle">Toggle</option>
-            <option value="set">Set</option>
-        </select>
-    </sdpi-item>
+    <div id="online-settings">
+        <sdpi-item label="Mode">
+            <select id="status-mode">
+                <option value="cycle">Cycle</option>
+                <option value="toggle">Toggle</option>
+                <option value="set">Set</option>
+            </select>
+        </sdpi-item>
 
-    <div id="status-settings">
-        <sdpi-item label="State 1">
-            <div class="status-picker" data-setting="toggleStatusOne" data-default="active"></div>
-        </sdpi-item>
-        <sdpi-item label="State 2">
-            <div class="status-picker" data-setting="toggleStatusTwo" data-default="busy"></div>
-        </sdpi-item>
+        <div id="status-settings">
+            <sdpi-item label="State 1">
+                <div class="status-picker" data-setting="toggleStatusOne" data-default="active"></div>
+            </sdpi-item>
+            <sdpi-item label="State 2">
+                <div class="status-picker" data-setting="toggleStatusTwo" data-default="busy"></div>
+            </sdpi-item>
+        </div>
     </div>
+    <div id="login-required">VRC login is required. Add a VRC Login button to your Stream Deck and sign in.</div>
 
     <script src="online-status.js"></script>
 </body>

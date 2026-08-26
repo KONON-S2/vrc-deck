@@ -23,6 +23,16 @@ export class VrcLogin extends SingletonAction<LoginSettings> {
     private loggedIn = false;
     private displayName = "";
 
+    constructor() {
+        super();
+        vrchatAuth.onAuthChanged((loggedIn) => {
+            void streamDeck.ui.sendToPropertyInspector({
+                event: "authStatus",
+                loggedIn
+            });
+        });
+    }
+
     override async onWillAppear(ev: WillAppearEvent<LoginSettings>): Promise<void> {
         await this.restoreLogin();
         await this.updateButton(ev.action);

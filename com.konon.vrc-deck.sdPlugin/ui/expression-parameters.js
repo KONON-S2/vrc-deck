@@ -6,8 +6,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
 
     input.removeAttribute("list");
-    input.style.width = "calc(100% + 40px)";
-    input.style.marginLeft = "-20px";
+    input.style.width = "100%";
+    input.style.marginLeft = "0";
     input.style.boxSizing = "border-box";
     input.style.color = "#ffffff";
     input.style.fontSize = "11px";
@@ -23,7 +23,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     results.style.maxHeight = "220px";
     results.style.overflowY = "scroll";
     results.style.scrollbarGutter = "stable";
-    results.style.margin = "4px 4px 8px 72px";
+    results.style.margin = "4px 4px 8px 52px";
     results.style.border = "1px solid #555";
     results.style.borderRadius = "3px";
     results.style.background = "#2d2d2d";
@@ -45,9 +45,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     document.head.appendChild(scrollbarStyle);
 
     const typeInfo = document.createElement("div");
-    typeInfo.style.margin = "2px 4px 10px 72px";
+    typeInfo.style.margin = "2px 4px 10px 52px";
     typeInfo.style.color = "#bdbdbd";
-    typeInfo.style.fontSize = "12px";
+    typeInfo.style.fontSize = "11px";
     typeInfo.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
     typeInfo.textContent = "Type: Not selected";
 

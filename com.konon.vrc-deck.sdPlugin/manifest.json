@@ -1,43 +1,12 @@
 {
     "Name": "VRC Deck",
-    "Version": "0.1.0.1",
+    "Version": "1.0.0.0",
     "Author": "KONON",
     "Actions": [
         {
-            "Name": "Counter",
-            "UUID": "com.konon.vrc-deck.increment",
-            "Icon": "imgs/actions/counter/icon",
-            "Tooltip": "Displays a count, which increments by one on press.",
-            "PropertyInspectorPath": "ui/increment-counter.html",
-            "Controllers": [
-                "Keypad"
-            ],
-            "States": [
-                {
-                    "Image": "imgs/actions/counter/key",
-                    "TitleAlignment": "middle"
-                }
-            ]
-        },
-        {
-            "Name": "OSC Test",
-            "UUID": "com.konon.vrc-deck.osc-test",
-            "Icon": "imgs/actions/counter/icon",
-            "Tooltip": "Sends a test OSC parameter to VRChat.",
-            "Controllers": [
-                "Keypad"
-            ],
-            "States": [
-                {
-                    "Image": "imgs/actions/counter/key",
-                    "TitleAlignment": "middle"
-                }
-            ]
-        },
-        {
             "Name": "Mic Toggle",
             "UUID": "com.konon.vrc-deck.mic-toggle",
-            "Icon": "imgs/actions/counter/icon",
+            "Icon": "imgs/actions/mic-toggle/mic-list",
             "Tooltip": "Toggle your VRChat microphone and display its current state.",
             "PropertyInspectorPath": "ui/mic-toggle.html",
             "Controllers": [
@@ -45,14 +14,16 @@
             ],
             "States": [
                 {
-                    "Image": "imgs/actions/counter/key",
+                    "Image": "imgs/actions/mic-toggle/mic",
+                    "FontSize": 11,
                     "Title": "MIC ON",
-                    "TitleAlignment": "middle"
+                    "TitleAlignment": "bottom"
                 },
                 {
-                    "Image": "imgs/actions/counter/key",
+                    "Image": "imgs/actions/mic-toggle/mic-off",
+                    "FontSize": 11,
                     "Title": "MIC OFF",
-                    "TitleAlignment": "middle"
+                    "TitleAlignment": "bottom"
                 }
             ]
         },
@@ -67,12 +38,14 @@
             ],
             "States": [
                 {
-                    "Image": "imgs/actions/counter/key",
+                    "Image": "imgs/actions/blank",
+                    "FontSize": 11,
                     "Title": "AFK OFF",
                     "TitleAlignment": "middle"
                 },
                 {
-                    "Image": "imgs/actions/counter/key",
+                    "Image": "imgs/actions/blank",
+                    "FontSize": 11,
                     "Title": "AFK ON",
                     "TitleAlignment": "middle"
                 }
@@ -81,7 +54,7 @@
         {
             "Name": "VRC Login",
             "UUID": "com.konon.vrc-deck.vrc-login",
-            "Icon": "imgs/actions/counter/icon",
+            "Icon": "imgs/actions/vrc-login/vrc-mark-list",
             "Tooltip": "Sign in to VRChat for VRC Deck API features.",
             "PropertyInspectorPath": "ui/vrc-login.html",
             "Controllers": [
@@ -89,37 +62,41 @@
             ],
             "States": [
                 {
-                    "Image": "imgs/actions/counter/key",
-                    "Title": "VRC\nLOGIN",
-                    "TitleAlignment": "middle"
+                    "Image": "imgs/actions/vrc-login/vrc-mark",
+                    "FontSize": 11,
+                    "Title": "LOGIN",
+                    "TitleAlignment": "bottom"
                 },
                 {
-                    "Image": "imgs/actions/counter/key",
-                    "Title": "VRC\nLOGGED IN",
-                    "TitleAlignment": "middle"
+                    "Image": "imgs/actions/vrc-login/vrc-mark",
+                    "FontSize": 11,
+                    "Title": "LOGGED IN",
+                    "TitleAlignment": "bottom"
                 }
             ]
         },
         {
             "Name": "Instance Status",
             "UUID": "com.konon.vrc-deck.instance-status",
-            "Icon": "imgs/actions/counter/icon",
+            "Icon": "imgs/actions/instance-status/users-list",
             "Tooltip": "Display current and maximum users in the active VRChat instance.",
+            "PropertyInspectorPath": "ui/instance-status.html",
             "Controllers": [
                 "Keypad"
             ],
             "States": [
                 {
-                    "Image": "imgs/actions/counter/key",
+                    "Image": "imgs/actions/instance-status/users",
+                    "FontSize": 11,
                     "Title": "-- / --",
-                    "TitleAlignment": "middle"
+                    "TitleAlignment": "bottom"
                 }
             ]
         },
         {
             "Name": "Avatar Change",
             "UUID": "com.konon.vrc-deck.avatar-change",
-            "Icon": "imgs/actions/counter/icon",
+            "Icon": "imgs/actions/avatar-change/person-standing-list",
             "Tooltip": "Select and switch to a VRChat avatar.",
             "PropertyInspectorPath": "ui/avatar-change.html",
             "Controllers": [
@@ -127,8 +104,27 @@
             ],
             "States": [
                 {
-                    "Image": "imgs/actions/counter/key",
+                    "Image": "imgs/actions/avatar-change/person-standing",
+                    "FontSize": 11,
                     "Title": "Avatar",
+                    "TitleAlignment": "bottom"
+                }
+            ]
+        },
+        {
+            "Name": "Current Avatar",
+            "UUID": "com.konon.vrc-deck.current-avatar",
+            "Icon": "imgs/actions/avatar-change/person-standing-list",
+            "Tooltip": "Display your currently equipped VRChat avatar.",
+            "PropertyInspectorPath": "ui/current-avatar.html",
+            "Controllers": [
+                "Keypad"
+            ],
+            "States": [
+                {
+                    "Image": "imgs/actions/avatar-change/person-standing",
+                    "FontSize": 11,
+                    "Title": "CURRENT AVATAR",
                     "TitleAlignment": "bottom"
                 }
             ]
@@ -145,6 +141,7 @@
             "States": [
                 {
                     "Image": "imgs/actions/online-status/online",
+                    "FontSize": 11,
                     "Title": "ONLINE",
                     "TitleAlignment": "bottom"
                 }
@@ -153,7 +150,7 @@
         {
             "Name": "Expression Toggle",
             "UUID": "com.konon.vrc-deck.expression-toggle",
-            "Icon": "imgs/actions/counter/icon",
+            "Icon": "imgs/actions/expression/toggle-right-list",
             "Tooltip": "Toggle a VRChat avatar expression parameter.",
             "PropertyInspectorPath": "ui/expression-toggle.html",
             "Controllers": [
@@ -161,21 +158,21 @@
             ],
             "States": [
                 {
-                    "Image": "imgs/actions/counter/key",
-                    "Title": "OFF",
-                    "TitleAlignment": "middle"
+                    "Image": "imgs/actions/expression/toggle-left",
+                    "FontSize": 11,
+                    "TitleAlignment": "bottom"
                 },
                 {
-                    "Image": "imgs/actions/counter/key",
-                    "Title": "ON",
-                    "TitleAlignment": "middle"
+                    "Image": "imgs/actions/expression/toggle-right",
+                    "FontSize": 11,
+                    "TitleAlignment": "bottom"
                 }
             ]
         },
         {
             "Name": "Expression Button",
             "UUID": "com.konon.vrc-deck.expression-button",
-            "Icon": "imgs/actions/counter/icon",
+            "Icon": "imgs/actions/expression/circle-dot-list",
             "Tooltip": "Set a VRChat avatar expression parameter to a configured value.",
             "PropertyInspectorPath": "ui/expression-button.html",
             "Controllers": [
@@ -183,16 +180,17 @@
             ],
             "States": [
                 {
-                    "Image": "imgs/actions/counter/key",
+                    "Image": "imgs/actions/expression/circle-dot",
+                    "FontSize": 11,
                     "Title": "Button",
-                    "TitleAlignment": "middle"
+                    "TitleAlignment": "bottom"
                 }
             ]
         },
         {
             "Name": "Expression Cycle",
             "UUID": "com.konon.vrc-deck.expression-cycle",
-            "Icon": "imgs/actions/counter/icon",
+            "Icon": "imgs/actions/expression/rotate-cw-list",
             "Tooltip": "Cycle an expression parameter from zero to a maximum value.",
             "PropertyInspectorPath": "ui/expression-cycle.html",
             "Controllers": [
@@ -200,8 +198,8 @@
             ],
             "States": [
                 {
-                    "Image": "imgs/actions/counter/key",
-                    "Title": "Cycle",
+                    "Image": "imgs/actions/expression/rotate-cw",
+                    "FontSize": 11,
                     "TitleAlignment": "middle"
                 }
             ]
@@ -209,7 +207,7 @@
         {
             "Name": "Expression Increase",
             "UUID": "com.konon.vrc-deck.expression-increase",
-            "Icon": "imgs/actions/counter/icon",
+            "Icon": "imgs/actions/expression/plus-list",
             "Tooltip": "Increase a VRChat avatar expression parameter.",
             "PropertyInspectorPath": "ui/expression-increase.html",
             "Controllers": [
@@ -217,8 +215,8 @@
             ],
             "States": [
                 {
-                    "Image": "imgs/actions/counter/key",
-                    "Title": "+",
+                    "Image": "imgs/actions/expression/plus",
+                    "FontSize": 11,
                     "TitleAlignment": "middle"
                 }
             ]
@@ -226,7 +224,7 @@
         {
             "Name": "Expression Decrease",
             "UUID": "com.konon.vrc-deck.expression-decrease",
-            "Icon": "imgs/actions/counter/icon",
+            "Icon": "imgs/actions/expression/minus-list",
             "Tooltip": "Decrease a VRChat avatar expression parameter.",
             "PropertyInspectorPath": "ui/expression-decrease.html",
             "Controllers": [
@@ -234,15 +232,33 @@
             ],
             "States": [
                 {
-                    "Image": "imgs/actions/counter/key",
-                    "Title": "-",
+                    "Image": "imgs/actions/expression/minus",
+                    "FontSize": 11,
                     "TitleAlignment": "middle"
+                }
+            ]
+        },
+        {
+            "Name": "Auto Chat",
+            "UUID": "com.konon.vrc-deck.auto-chat",
+            "Icon": "imgs/actions/auto-chat/message-square-text-list",
+            "Tooltip": "Send a saved message directly to the VRChat chatbox.",
+            "PropertyInspectorPath": "ui/auto-chat.html",
+            "Controllers": [
+                "Keypad"
+            ],
+            "States": [
+                {
+                    "Image": "imgs/actions/auto-chat/message-square-text",
+                    "FontSize": 11,
+                    "Title": "AUTO CHAT",
+                    "TitleAlignment": "bottom"
                 }
             ]
         }
     ],
     "Category": "VRC Deck",
-    "CategoryIcon": "imgs/plugin/category-icon",
+    "CategoryIcon": "imgs/plugin/vrc-deck-mark",
     "CodePath": "bin/plugin.js",
     "Description": "Control and monitor VRChat directly from your Stream Deck using OSC.",
     "Icon": "imgs/plugin/marketplace",

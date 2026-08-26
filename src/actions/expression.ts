@@ -26,6 +26,10 @@ type ExpressionSettings = {
 };
 
 abstract class ExpressionAction extends SingletonAction<ExpressionSettings> {
+    private readonly parameterNames = new Map<any, string>();
+    private readonly pressedToggleActions = new Set<any>();
+    private readonly pendingToggleStates = new Map<any, boolean>();
+
     constructor(private readonly operation: Operation) {
         super();
 
@@ -38,6 +42,7 @@ abstract class ExpressionAction extends SingletonAction<ExpressionSettings> {
 
     override async onWillAppear(ev: WillAppearEvent<ExpressionSettings>): Promise<void> {
         if (this.operation === "toggle") {
+            this.parameterNames.set(ev.action, ev.payload.settings.parameterName?.trim() ?? "");
             await this.updateToggleTitles(ev.action, ev.payload.settings);
             await this.applyCurrentState(ev.action, ev.payload.settings);
         }
@@ -47,6 +52,7 @@ abstract class ExpressionAction extends SingletonAction<ExpressionSettings> {
         ev: DidReceiveSettingsEvent<ExpressionSettings>
     ): Promise<void> {
         if (this.operation === "toggle") {
+            this.parameterNames.set(ev.action, ev.payload.settings.parameterName?.trim() ?? "");
             await this.updateToggleTitles(ev.action, ev.payload.settings);
             await this.applyCurrentState(ev.action, ev.payload.settings);
         }
@@ -85,9 +91,13 @@ abstract class ExpressionAction extends SingletonAction<ExpressionSettings> {
         );
 
         switch (this.operation) {
-            case "toggle":
-                this.sendValue(settings, current === 0 ? 1 : 0);
+            case "toggle": {
+                const next = current === 0;
+                this.pressedToggleActions.add(ev.action);
+                this.pendingToggleStates.set(ev.action, next);
+                this.sendValue(settings, next ? 1 : 0);
                 break;
+            }
             case "button":
                 this.sendValue(settings, settings.buttonValue);
                 break;
@@ -119,8 +129,13 @@ abstract class ExpressionAction extends SingletonAction<ExpressionSettings> {
 
         if (this.operation === "toggle") {
             setTimeout(() => {
-                void this.applyCurrentState(ev.action, settings);
-            }, 150);
+                const pending = this.pendingToggleStates.get(ev.action);
+                this.pressedToggleActions.delete(ev.action);
+                this.pendingToggleStates.delete(ev.action);
+                if (pending !== undefined) {
+                    void ev.action.setState(pending ? 1 : 0);
+                }
+            }, 25);
         }
     }
 
@@ -178,9 +193,11 @@ abstract class ExpressionAction extends SingletonAction<ExpressionSettings> {
     ): Promise<void> {
         for (const action of this.actions) {
             try {
-                const settings = this.withDefaults(await action.getSettings<ExpressionSettings>());
-
-                if (settings.parameterName === name && action.isKey()) {
+                if (
+                    this.parameterNames.get(action) === name &&
+                    action.isKey() &&
+                    !this.pressedToggleActions.has(action)
+                ) {
                     await action.setState(this.asNumber(value) !== 0 ? 1 : 0);
                 }
             } catch (error) {

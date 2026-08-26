@@ -14,12 +14,17 @@
         .avatar-option:hover { background: #3f3f3f; }
         .avatar-option img { width: 34px; height: 34px; border-radius: 3px; object-fit: cover; background: #222; }
         #avatar-status { margin: 3px 4px 8px 72px; color: #bdbdbd; font: 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; overflow-wrap: anywhere; }
+        #avatar-settings.login-disabled { opacity: .38; pointer-events: none; }
+        #login-required { display: none; margin: 10px 8px 4px 72px; color: #ff6b6b; font: 600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.45; }
     </style>
 </head>
 <body>
-    <sdpi-item label="Avatar"><input id="avatar-search" type="text" placeholder="Search avatars..." autocomplete="off" /></sdpi-item>
-    <div id="avatar-results"></div>
-    <div id="avatar-status">Loading avatars...</div>
+    <div id="avatar-settings">
+        <sdpi-item label="Avatar"><input id="avatar-search" type="text" placeholder="Search avatars..." autocomplete="off" /></sdpi-item>
+        <div id="avatar-results"></div>
+        <div id="avatar-status">Loading avatars...</div>
+    </div>
+    <div id="login-required">VRC login is required. Add a VRC Login button to your Stream Deck and sign in.</div>
     <script src="avatar-change.js"></script>
 </body>
 </html>

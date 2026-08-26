@@ -17,27 +17,35 @@ type MicToggleSettings = {
 @action({ UUID: "com.konon.vrc-deck.mic-toggle" })
 export class MicToggle extends SingletonAction<MicToggleSettings> {
     private muted = false;
+    private keyPressed = false;
 
     constructor() {
         super();
 
         vrchatOsc.onMuteSelfChanged((muted) => {
             this.muted = muted;
-            void this.updateAllButtons();
+            if (!this.keyPressed) {
+                void this.updateAllButtons();
+            }
         });
     }
 
     override async onKeyDown(_ev: KeyDownEvent<MicToggleSettings>): Promise<void> {
-        vrchatOsc.toggleVoice();
-        // The returning MuteSelf event remains the source of truth.
+        this.keyPressed = true;
+        this.muted = !this.muted;
+        vrchatOsc.voiceKeyDown();
+        // Stream Deck advances the state automatically on key release. Avoid
+        // setting it here as that would cause a visible double transition.
     }
 
     override async onKeyUp(_ev: KeyUpEvent<MicToggleSettings>): Promise<void> {
+        vrchatOsc.voiceKeyUp();
         // Stream Deck automatically advances multi-state actions after a key
-        // press. Reapply VRChat's actual state after that transition finishes.
+        // press. Apply the confirmed state once that transition has finished.
         setTimeout(() => {
+            this.keyPressed = false;
             void this.updateAllButtons();
-        }, 150);
+        }, 25);
     }
 
     override async onWillAppear(ev: WillAppearEvent<MicToggleSettings>): Promise<void> {

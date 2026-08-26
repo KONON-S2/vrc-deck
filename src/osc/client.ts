@@ -62,10 +62,6 @@ class VrchatOscClient {
     }
 
     private handleMessage(message: any): void {
-        streamDeck.logger.debug(
-            `[OSC RECEIVE] ${message.address} ${JSON.stringify(message.args ?? [])}`
-        );
-
         const parameterPrefix = "/avatar/parameters/";
 
         if (message.address === "/avatar/change") {
@@ -113,6 +109,35 @@ class VrchatOscClient {
             this.resolveParameterType(firstArgument, parameterValue)
         );
 
+        // Mic state is latency-sensitive. Notify its listeners before the
+        // general expression listeners perform any settings lookups.
+        if (parameterName === "MuteSelf") {
+            let muted: boolean | undefined;
+
+            if (typeof rawValue === "boolean") {
+                muted = rawValue;
+            } else if (typeof rawValue === "number") {
+                muted = rawValue !== 0;
+            }
+
+            if (muted !== undefined) {
+                this.muteSelf = muted;
+                streamDeck.logger.info(`[MIC] MuteSelf = ${muted}`);
+
+                for (const listener of this.muteSelfListeners) {
+                    try {
+                        listener(muted);
+                    } catch (error) {
+                        streamDeck.logger.error(
+                            `[MIC] Listener failed: ${error instanceof Error ? error.stack ?? error.message : String(error)}`
+                        );
+                    }
+                }
+            } else {
+                streamDeck.logger.warn(`[MIC] Ignored unsupported MuteSelf value: ${String(rawValue)}`);
+            }
+        }
+
         for (const listener of this.parameterListeners) {
             try {
                 listener(parameterName, parameterValue);
@@ -123,33 +148,6 @@ class VrchatOscClient {
             }
         }
 
-        if (parameterName !== "MuteSelf") {
-            return;
-        }
-
-        let muted: boolean;
-
-        if (typeof rawValue === "boolean") {
-            muted = rawValue;
-        } else if (typeof rawValue === "number") {
-            muted = rawValue !== 0;
-        } else {
-            streamDeck.logger.warn(`[MIC] Ignored unsupported MuteSelf value: ${String(rawValue)}`);
-            return;
-        }
-
-        this.muteSelf = muted;
-        streamDeck.logger.info(`[MIC] MuteSelf = ${muted}`);
-
-        for (const listener of this.muteSelfListeners) {
-            try {
-                listener(muted);
-            } catch (error) {
-                streamDeck.logger.error(
-                    `[MIC] Listener failed: ${error instanceof Error ? error.stack ?? error.message : String(error)}`
-                );
-            }
-        }
     }
 
     onMuteSelfChanged(listener: BooleanListener): () => void {
@@ -363,12 +361,23 @@ class VrchatOscClient {
         });
     }
 
-    toggleVoice(): void {
-        this.sendInt("/input/Voice", 1);
+    sendChatbox(message: string, playNotification = true): void {
+        this.sender.send({
+            address: "/chatbox/input",
+            args: [
+                { type: "s", value: message },
+                { type: "T", value: true },
+                { type: playNotification ? "T" : "F", value: playNotification }
+            ]
+        });
+    }
 
-        setTimeout(() => {
-            this.sendInt("/input/Voice", 0);
-        }, 80);
+    voiceKeyDown(): void {
+        this.send("/input/Voice", true);
+    }
+
+    voiceKeyUp(): void {
+        this.send("/input/Voice", false);
     }
 }
 

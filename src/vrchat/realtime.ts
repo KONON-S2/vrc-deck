@@ -4,6 +4,7 @@ import WebSocket, { type RawData } from "ws";
 import { vrchatAuth, type VrchatOnlineStatus } from "./auth";
 
 type StatusListener = (status: VrchatOnlineStatus) => void;
+type AvatarListener = (avatarId: string) => void;
 
 const VALID_STATUSES = new Set<VrchatOnlineStatus>([
     "join me",
@@ -15,6 +16,7 @@ const VALID_STATUSES = new Set<VrchatOnlineStatus>([
 
 class VrchatRealtime {
     private readonly statusListeners = new Set<StatusListener>();
+    private readonly avatarListeners = new Set<AvatarListener>();
     private socket: WebSocket | undefined;
     private reconnectTimer: ReturnType<typeof setTimeout> | undefined;
     private reconnectDelay = 1000;
@@ -28,7 +30,19 @@ class VrchatRealtime {
         void this.connect();
         return () => {
             this.statusListeners.delete(listener);
-            if (this.statusListeners.size === 0) {
+            if (this.statusListeners.size === 0 && this.avatarListeners.size === 0) {
+                this.stop();
+            }
+        };
+    }
+
+    onAvatarChanged(listener: AvatarListener): () => void {
+        this.avatarListeners.add(listener);
+        this.stopped = false;
+        void this.connect();
+        return () => {
+            this.avatarListeners.delete(listener);
+            if (this.statusListeners.size === 0 && this.avatarListeners.size === 0) {
                 this.stop();
             }
         };
@@ -50,7 +64,7 @@ class VrchatRealtime {
         if (
             this.connecting ||
             this.stopped ||
-            this.statusListeners.size === 0 ||
+            (this.statusListeners.size === 0 && this.avatarListeners.size === 0) ||
             this.socket?.readyState === WebSocket.OPEN
         ) {
             return;
@@ -126,12 +140,17 @@ class VrchatRealtime {
             }
 
             const status = user.status ?? (content as any).status;
-            if (!VALID_STATUSES.has(status)) {
-                return;
+            if (VALID_STATUSES.has(status)) {
+                for (const listener of this.statusListeners) {
+                    listener(status);
+                }
             }
 
-            for (const listener of this.statusListeners) {
-                listener(status);
+            const avatarId = user.currentAvatar ?? (content as any).currentAvatar;
+            if (typeof avatarId === "string" && avatarId.startsWith("avtr_")) {
+                for (const listener of this.avatarListeners) {
+                    listener(avatarId);
+                }
             }
         } catch (error) {
             streamDeck.logger.debug(
@@ -141,7 +160,11 @@ class VrchatRealtime {
     }
 
     private scheduleReconnect(): void {
-        if (this.stopped || this.statusListeners.size === 0 || this.reconnectTimer) {
+        if (
+            this.stopped ||
+            (this.statusListeners.size === 0 && this.avatarListeners.size === 0) ||
+            this.reconnectTimer
+        ) {
             return;
         }
         const delay = this.reconnectDelay;
