@@ -6,16 +6,22 @@
     <script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
     <style>
         #instance-settings.login-disabled { opacity: .38; pointer-events: none; }
-        #display-mode { width: 100%; box-sizing: border-box; padding: 6px 8px; color: #fff; background: #3a3a3a; border: 1px solid #555; border-radius: 3px; }
+        #display-mode, #text-mode { width: 100%; box-sizing: border-box; padding: 6px 8px; color: #fff; background: #3a3a3a; border: 1px solid #555; border-radius: 3px; }
         #login-required { display: none; margin: 10px 8px 4px 72px; color: #ff6b6b; font: 600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.45; }
     </style>
 </head>
 <body>
     <div id="instance-settings">
-        <sdpi-item label="Display">
+        <sdpi-item label="Image">
             <select id="display-mode">
                 <option value="icon">Users Icon</option>
                 <option value="thumbnail">Instance Thumbnail</option>
+            </select>
+        </sdpi-item>
+        <sdpi-item label="Text">
+            <select id="text-mode">
+                <option value="players">Player Count</option>
+                <option value="world">World Name</option>
             </select>
         </sdpi-item>
     </div>

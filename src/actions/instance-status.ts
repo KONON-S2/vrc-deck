@@ -10,7 +10,10 @@ import streamDeck, {
 import { vrchatAuth } from "../vrchat/auth";
 import { vrchatGameLog } from "../vrchat/game-log";
 
-type InstanceStatusSettings = { displayMode?: "icon" | "thumbnail" };
+type InstanceStatusSettings = {
+    displayMode?: "icon" | "thumbnail";
+    textMode?: "players" | "world";
+};
 type InstanceStatusMessage = { event?: "getAuthStatus" };
 
 @action({ UUID: "com.konon.vrc-deck.instance-status" })
@@ -18,6 +21,7 @@ export class InstanceStatus extends SingletonAction<InstanceStatusSettings> {
     private capacity = 0;
     private currentUsers = 0;
     private currentLocation = "";
+    private worldName = "";
     private thumbnailImageUrl = "";
     private refreshTimer: ReturnType<typeof setTimeout> | undefined;
     private readonly imageCache = new Map<string, string>();
@@ -29,6 +33,7 @@ export class InstanceStatus extends SingletonAction<InstanceStatusSettings> {
                 this.currentLocation = activity.location;
                 this.capacity = 0;
                 this.currentUsers = 0;
+                this.worldName = "";
                 this.thumbnailImageUrl = "";
                 this.scheduleRefresh(750);
                 return;
@@ -74,6 +79,7 @@ export class InstanceStatus extends SingletonAction<InstanceStatusSettings> {
         const location = vrchatGameLog.getCurrentLocation();
         if (!location) {
             this.thumbnailImageUrl = "";
+            this.worldName = "";
             await this.updateAllButtons("NO INSTANCE");
             return;
         }
@@ -81,6 +87,7 @@ export class InstanceStatus extends SingletonAction<InstanceStatusSettings> {
             const instance = await vrchatAuth.getInstance(location);
             this.currentLocation = instance.location;
             this.capacity = instance.capacity;
+            this.worldName = instance.worldName;
             this.thumbnailImageUrl = instance.thumbnailImageUrl ?? "";
             const loggedPlayerCount = vrchatGameLog.getCurrentPlayerCount();
             this.currentUsers = loggedPlayerCount > 0 ? loggedPlayerCount : instance.currentUsers;
@@ -99,10 +106,12 @@ export class InstanceStatus extends SingletonAction<InstanceStatusSettings> {
     }
 
     private async updateButton(actionInstance: any, title?: string, providedSettings?: InstanceStatusSettings): Promise<void> {
-        const display = title ?? (this.capacity > 0 ? `${this.currentUsers} / ${this.capacity}` : "-- / --");
-        await actionInstance.setTitle(display);
         const settings = providedSettings
             ?? await actionInstance.getSettings() as InstanceStatusSettings;
+        const defaultDisplay = settings.textMode === "world"
+            ? (this.worldName || "NO INSTANCE")
+            : (this.capacity > 0 ? `${this.currentUsers} / ${this.capacity}` : "-- / --");
+        await actionInstance.setTitle(title ?? defaultDisplay);
         if (settings.displayMode !== "thumbnail" || !this.thumbnailImageUrl) {
             await actionInstance.setImage();
             return;

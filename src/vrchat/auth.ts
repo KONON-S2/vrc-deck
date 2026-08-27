@@ -34,6 +34,7 @@ export type VrchatInstanceInfo = {
     capacity: number;
     currentUsers: number;
     location: string;
+    worldName: string;
     thumbnailImageUrl?: string;
 };
 
@@ -167,6 +168,7 @@ class VrchatAuth {
             userCount?: number;
             location?: string;
             world?: {
+                name?: string;
                 thumbnailImageUrl?: string;
                 imageUrl?: string;
             };
@@ -176,6 +178,7 @@ class VrchatAuth {
             capacity: Number(instance.capacity ?? 0),
             currentUsers: Math.max(1, Number(instance.n_users ?? instance.userCount ?? 1)),
             location: instance.location ?? location,
+            worldName: instance.world?.name?.trim() || "UNKNOWN WORLD",
             thumbnailImageUrl: instance.world?.thumbnailImageUrl ?? instance.world?.imageUrl
         };
     }
