@@ -93,40 +93,12 @@ Worlds can restrict or disable avatar scaling. In that case, VRChat may ignore a
 - Instance and avatar thumbnails are downloaded when needed and cached in plugin memory. They are not saved as separate image files by VRC Deck.
 - API actions may stop working when the VRChat session expires. Use VRC Login again to restore access.
 
-## Development
-
-Install dependencies:
-
-```powershell
-npm install
-```
-
-Build continuously and restart the plugin after each build:
-
-```powershell
-npm run watch
-```
-
-Create a production build:
-
-```powershell
-npm run build
-```
-
-Validate the plugin:
-
-```powershell
-npx streamdeck validate com.konon.vrc-deck.sdPlugin --no-update-check
-```
-
-Create an installable package:
-
-```powershell
-npx streamdeck pack com.konon.vrc-deck.sdPlugin --no-update-check
-```
-
 ## Support
 
 Report problems through the [GitHub repository](https://github.com/KONON-S2/vrc-deck).
 
 When reporting a problem, include the affected action, Stream Deck version, VRChat mode (Desktop or VR), and the steps required to reproduce it. Do not include your password, session data, or other private account information.
+
+## Support the Project
+
+If you enjoy VRC Deck and would like to support its development, you can [buy me a coffee](https://buymeacoffee.com/konon).
