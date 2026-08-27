@@ -122,3 +122,9 @@ When reporting a problem, include the affected action, Stream Deck version, VRCh
 ## Support the Project
 
 If you enjoy VRC Deck and would like to support its development, you can [buy me a coffee](https://buymeacoffee.com/konon).
+
+## License
+
+VRC Deck source code is available under the [MIT License](LICENSE).
+
+Lucide icons and other third-party materials remain subject to their respective licenses. VRChat names, logos, and trademarks belong to VRChat Inc. See the included notice files for details.

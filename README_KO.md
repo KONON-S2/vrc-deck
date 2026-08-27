@@ -122,3 +122,9 @@ Expression 액션은 현재 착용 중인 아바타의 파라미터를 불러옵
 ## 프로젝트 후원
 
 VRC Deck이 마음에 들고 개발을 후원하고 싶다면 [Buy Me a Coffee](https://buymeacoffee.com/konon)를 이용해 주세요.
+
+## 라이선스
+
+VRC Deck 소스 코드는 [MIT License](LICENSE)에 따라 공개됩니다.
+
+Lucide 아이콘 및 기타 제3자 자료에는 각각의 라이선스가 적용됩니다. VRChat 명칭, 로고 및 상표의 권리는 VRChat Inc.에 있습니다. 자세한 내용은 저장소에 포함된 고지 파일을 확인하세요.
