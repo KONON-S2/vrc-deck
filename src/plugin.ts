@@ -1,4 +1,4 @@
-import "./osc/client";
+import { vrchatOsc } from "./osc/client";
 
 import streamDeck from "@elgato/streamdeck";
 
@@ -42,5 +42,5 @@ streamDeck.actions.registerAction(new ExpressionDecrease());
 streamDeck.actions.registerAction(new AutoChat());
 streamDeck.actions.registerAction(new PanicButton());
 
-// Connect to Stream Deck.
-streamDeck.connect();
+// Connect to Stream Deck, then restore the most recently selected avatar height.
+void streamDeck.connect().then(() => vrchatOsc.restoreSavedEyeHeight());

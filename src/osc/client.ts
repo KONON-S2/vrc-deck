@@ -12,6 +12,10 @@ type ParameterListener = (name: string, value: OscValue) => void;
 type AvatarListener = (avatarId: string) => void;
 export type ParameterType = "bool" | "int" | "float";
 
+type OscGlobalSettings = {
+    lastEyeHeight?: number;
+};
+
 class VrchatOscClient {
     private sender: any;
     private receiver: any;
@@ -26,9 +30,11 @@ class VrchatOscClient {
     private currentAvatarId: string | undefined;
     private muteSelf: boolean | undefined;
     private eyeHeight: number | undefined;
+    private desiredEyeHeight: number | undefined;
     private eyeHeightScalingAllowed: boolean | undefined;
     private readonly eyeHeightResyncTimers = new Set<ReturnType<typeof setTimeout>>();
     private readonly eyeHeightVerificationTimers = new Set<ReturnType<typeof setTimeout>>();
+    private eyeHeightPersistTimer: ReturnType<typeof setTimeout> | undefined;
     private readonly oscQuery = new OSCQueryDiscovery();
     private oscQueryStarted = false;
 
@@ -340,6 +346,24 @@ class VrchatOscClient {
         return this.eyeHeightScalingAllowed;
     }
 
+    async restoreSavedEyeHeight(): Promise<void> {
+        try {
+            const settings = await streamDeck.settings.getGlobalSettings<OscGlobalSettings>();
+            const saved = Number(settings.lastEyeHeight);
+            if (!Number.isFinite(saved) || saved < 0.1 || saved > 100) {
+                return;
+            }
+
+            this.desiredEyeHeight = Math.round(saved * 100) / 100;
+            streamDeck.logger.info(`[OSC] Restored saved eye height ${this.desiredEyeHeight}`);
+            this.resyncEyeHeight();
+        } catch (error) {
+            streamDeck.logger.warn(
+                `[OSC] Could not restore eye height: ${error instanceof Error ? error.message : String(error)}`
+            );
+        }
+    }
+
     resyncEyeHeight(): void {
         this.eyeHeight = undefined;
         this.eyeHeightScalingAllowed = undefined;
@@ -350,10 +374,10 @@ class VrchatOscClient {
         this.eyeHeightResyncTimers.clear();
         this.clearEyeHeightVerificationTimers();
 
-        for (const delay of [750, 2500, 6000]) {
+        for (const delay of [100, 350, 750, 1500, 3000]) {
             const timer = setTimeout(() => {
                 this.eyeHeightResyncTimers.delete(timer);
-                void this.refreshEyeHeight();
+                void this.refreshEyeHeight().then(() => this.reapplySavedEyeHeight());
             }, delay);
             this.eyeHeightResyncTimers.add(timer);
         }
@@ -365,8 +389,10 @@ class VrchatOscClient {
         }
 
         const value = Math.max(0.1, Math.min(100, Math.round(height * 100) / 100));
+        this.desiredEyeHeight = value;
         this.updateEyeHeight(value);
         this.sendFloat("/avatar/eyeheight", value);
+        this.scheduleEyeHeightPersistence(value);
 
         this.clearEyeHeightVerificationTimers();
         for (const delay of [300, 1200]) {
@@ -377,6 +403,44 @@ class VrchatOscClient {
             this.eyeHeightVerificationTimers.add(timer);
         }
         return true;
+    }
+
+    private reapplySavedEyeHeight(): void {
+        const desired = this.desiredEyeHeight;
+        if (desired === undefined || this.eyeHeightScalingAllowed === false) {
+            return;
+        }
+        if (this.eyeHeight !== undefined && Math.abs(this.eyeHeight - desired) < 0.005) {
+            return;
+        }
+
+        streamDeck.logger.info(`[OSC] Reapplying saved eye height ${desired}`);
+        this.updateEyeHeight(desired);
+        this.sendFloat("/avatar/eyeheight", desired);
+    }
+
+    private scheduleEyeHeightPersistence(height: number): void {
+        if (this.eyeHeightPersistTimer) {
+            clearTimeout(this.eyeHeightPersistTimer);
+        }
+        this.eyeHeightPersistTimer = setTimeout(() => {
+            this.eyeHeightPersistTimer = undefined;
+            void this.persistEyeHeight(height);
+        }, 300);
+    }
+
+    private async persistEyeHeight(height: number): Promise<void> {
+        try {
+            const settings = await streamDeck.settings.getGlobalSettings<OscGlobalSettings>();
+            await streamDeck.settings.setGlobalSettings({
+                ...settings,
+                lastEyeHeight: height
+            });
+        } catch (error) {
+            streamDeck.logger.warn(
+                `[OSC] Could not save eye height: ${error instanceof Error ? error.message : String(error)}`
+            );
+        }
     }
 
     private clearEyeHeightVerificationTimers(): void {
