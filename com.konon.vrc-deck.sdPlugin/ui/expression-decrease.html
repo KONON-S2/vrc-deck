@@ -7,11 +7,14 @@
 .change-slider, .repeat-slider { flex: 1 1 auto; min-width: 0; margin: 0; }
 </style></head>
 <body>
+<sdpi-item><div style="line-height: 1.5;">Recommended for Float parameters.</div></sdpi-item>
 <sdpi-item label="Parameter"><input data-expression-parameter list="expression-parameter-options" placeholder="Search parameters..." autocomplete="off" /></sdpi-item>
 <datalist id="expression-parameter-options"></datalist>
 <sdpi-item label="Change (0-1)"><div class="change-control"><input class="change-value" type="text" inputmode="decimal" value="0.10" aria-label="Change amount" /><input class="change-slider" type="range" min="0" max="1" step="0.01" value="0.1" aria-label="Change amount slider" /></div></sdpi-item>
 <sdpi-item label="Repeat (ms)"><div class="change-control"><input class="repeat-value" type="text" inputmode="numeric" value="250" aria-label="Repeat delay" /><input class="repeat-slider" type="range" min="20" max="2000" step="10" value="250" aria-label="Repeat delay slider" /></div></sdpi-item>
+<sdpi-item><div style="line-height: 1.5;">Repeat sets the delay between changes while the button is held.</div></sdpi-item>
 <sdpi-item label="Minimum"><sdpi-checkbox setting="minimumZero" default="true">Stop at 0</sdpi-checkbox></sdpi-item>
+<sdpi-item><div style="line-height: 1.5;">Minimum Lock prevents the value from decreasing below 0.</div></sdpi-item>
 <script src="expression-parameters.js"></script>
 <script src="expression-change.js"></script>
 </body></html>
