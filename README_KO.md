@@ -115,6 +115,8 @@ Expression 액션은 현재 착용 중인 아바타의 파라미터를 불러옵
 
 문제는 [GitHub 저장소](https://github.com/KONON-S2/vrc-deck)를 통해 제보해 주세요.
 
+피드백 및 기타 연락 수단은 [KONON 링크 모음](https://guns.lol/konon_s2)에서 확인할 수 있습니다.
+
 문제를 제보할 때는 해당 액션, Stream Deck 버전, VRChat 모드(Desktop 또는 VR), 재현 절차를 포함해 주세요. 비밀번호, 세션 데이터 또는 기타 개인정보는 포함하지 마세요.
 
 ## 프로젝트 후원

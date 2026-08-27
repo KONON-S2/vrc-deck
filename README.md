@@ -115,6 +115,8 @@ Worlds can restrict or disable avatar scaling. In that case, VRChat may ignore a
 
 Report problems through the [GitHub repository](https://github.com/KONON-S2/vrc-deck).
 
+For feedback and other contact options, visit [KONON's links](https://guns.lol/konon_s2).
+
 When reporting a problem, include the affected action, Stream Deck version, VRChat mode (Desktop or VR), and the steps required to reproduce it. Do not include your password, session data, or other private account information.
 
 ## Support the Project
