@@ -1,6 +1,6 @@
 {
     "Name": "VRC Deck",
-    "Version": "1.0.0.0",
+    "Version": "1.1.1.0",
     "Author": "KONON",
     "Actions": [
         {
@@ -130,9 +130,63 @@
             ]
         },
         {
+            "Name": "Avatar Height Increase",
+            "UUID": "com.konon.vrc-deck.avatar-height-increase",
+            "Icon": "imgs/actions/avatar-height/expand-list",
+            "Tooltip": "Increase your VRChat avatar height. Hold the key to repeat.",
+            "PropertyInspectorPath": "ui/avatar-height-increase.html",
+            "Controllers": [
+                "Keypad"
+            ],
+            "States": [
+                {
+                    "Image": "imgs/actions/avatar-height/expand",
+                    "FontSize": 11,
+                    "Title": "HEIGHT +",
+                    "TitleAlignment": "bottom"
+                }
+            ]
+        },
+        {
+            "Name": "Avatar Height Decrease",
+            "UUID": "com.konon.vrc-deck.avatar-height-decrease",
+            "Icon": "imgs/actions/avatar-height/shrink-list",
+            "Tooltip": "Decrease your VRChat avatar height. Hold the key to repeat.",
+            "PropertyInspectorPath": "ui/avatar-height-decrease.html",
+            "Controllers": [
+                "Keypad"
+            ],
+            "States": [
+                {
+                    "Image": "imgs/actions/avatar-height/shrink",
+                    "FontSize": 11,
+                    "Title": "HEIGHT -",
+                    "TitleAlignment": "bottom"
+                }
+            ]
+        },
+        {
+            "Name": "Avatar Height Set",
+            "UUID": "com.konon.vrc-deck.avatar-height-set",
+            "Icon": "imgs/actions/avatar-height/scaling-list",
+            "Tooltip": "Set your VRChat avatar to a configured height.",
+            "PropertyInspectorPath": "ui/avatar-height-set.html",
+            "Controllers": [
+                "Keypad"
+            ],
+            "States": [
+                {
+                    "Image": "imgs/actions/avatar-height/scaling",
+                    "FontSize": 11,
+                    "Title": "HEIGHT SET",
+                    "TitleAlignment": "bottom"
+                }
+            ]
+        },
+        {
             "Name": "Online Status",
             "UUID": "com.konon.vrc-deck.online-status",
-            "Icon": "imgs/actions/counter/icon",
+            "Icon": "imgs/actions/online-status/globe-list",
             "Tooltip": "Cycle, toggle, or set your VRChat online status.",
             "PropertyInspectorPath": "ui/online-status.html",
             "Controllers": [
@@ -255,13 +309,31 @@
                     "TitleAlignment": "bottom"
                 }
             ]
+        },
+        {
+            "Name": "Panic Button",
+            "UUID": "com.konon.vrc-deck.panic-button",
+            "Icon": "imgs/actions/panic-button/triangle-alert-list",
+            "Tooltip": "Turn on VRChat Safe Mode. Safe Mode must be turned off in VRChat.",
+            "PropertyInspectorPath": "ui/panic-button.html",
+            "Controllers": [
+                "Keypad"
+            ],
+            "States": [
+                {
+                    "Image": "imgs/actions/panic-button/triangle-alert",
+                    "FontSize": 11,
+                    "Title": "PANIC",
+                    "TitleAlignment": "bottom"
+                }
+            ]
         }
     ],
     "Category": "VRC Deck",
     "CategoryIcon": "imgs/plugin/vrc-deck-mark",
     "CodePath": "bin/plugin.js",
     "Description": "Control and monitor VRChat directly from your Stream Deck using OSC.",
-    "Icon": "imgs/plugin/marketplace",
+    "Icon": "imgs/plugin/vrc-deck-main",
     "SDKVersion": 3,
     "Software": {
         "MinimumVersion": "7.1"

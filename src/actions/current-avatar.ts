@@ -9,6 +9,7 @@ import streamDeck, {
 
 import { vrchatAuth, type VrchatAvatar } from "../vrchat/auth";
 import { vrchatRealtime } from "../vrchat/realtime";
+import { vrchatOsc } from "../osc/client";
 
 type CurrentAvatarSettings = Record<string, never>;
 type CurrentAvatarMessage = { event?: "getAuthStatus" };
@@ -17,6 +18,9 @@ type CurrentAvatarMessage = { event?: "getAuthStatus" };
 export class CurrentAvatar extends SingletonAction<CurrentAvatarSettings> {
     private readonly imageCache = new Map<string, string>();
     private unsubscribeRealtime: (() => void) | undefined;
+    private unsubscribeOsc: (() => void) | undefined;
+    private requestedAvatarId = "";
+    private refreshSequence = 0;
 
     constructor() {
         super();
@@ -39,6 +43,8 @@ export class CurrentAvatar extends SingletonAction<CurrentAvatarSettings> {
             if (this.actions.length === 0) {
                 this.unsubscribeRealtime?.();
                 this.unsubscribeRealtime = undefined;
+                this.unsubscribeOsc?.();
+                this.unsubscribeOsc = undefined;
             }
         }, 0);
     }
@@ -62,15 +68,52 @@ export class CurrentAvatar extends SingletonAction<CurrentAvatarSettings> {
         if (this.unsubscribeRealtime) {
             return;
         }
-        this.unsubscribeRealtime = vrchatRealtime.onAvatarChanged(() => {
-            void this.refreshAll(true);
+        this.unsubscribeOsc = vrchatOsc.onAvatarChanged((avatarId) => {
+            void this.refreshByAvatarId(avatarId);
+        });
+        this.unsubscribeRealtime = vrchatRealtime.onAvatarChanged((avatarId) => {
+            if (avatarId !== this.requestedAvatarId) {
+                void this.refreshByAvatarId(avatarId);
+            }
         });
     }
 
+    private async refreshByAvatarId(avatarId: string): Promise<void> {
+        if (!avatarId || avatarId === this.requestedAvatarId) {
+            return;
+        }
+        this.requestedAvatarId = avatarId;
+        const sequence = ++this.refreshSequence;
+
+        try {
+            const avatar = await vrchatAuth.getAvatarById(avatarId);
+            if (this.requestedAvatarId !== avatarId || sequence !== this.refreshSequence) {
+                return;
+            }
+            for (const actionInstance of this.actions) {
+                if (actionInstance.isKey()) {
+                    await this.applyAvatar(actionInstance, avatar);
+                }
+            }
+        } catch (error) {
+            if (this.requestedAvatarId === avatarId) {
+                this.requestedAvatarId = "";
+            }
+            streamDeck.logger.warn(
+                `[CURRENT AVATAR] OSC refresh failed: ${error instanceof Error ? error.message : String(error)}`
+            );
+        }
+    }
+
     private async refreshAll(forceRefresh: boolean): Promise<void> {
+        const sequence = ++this.refreshSequence;
         let avatar: VrchatAvatar;
         try {
             avatar = await vrchatAuth.getCurrentAvatar(forceRefresh);
+            if (sequence !== this.refreshSequence) {
+                return;
+            }
+            this.requestedAvatarId = avatar.id;
         } catch (error) {
             streamDeck.logger.warn(
                 `[CURRENT AVATAR] Refresh failed: ${error instanceof Error ? error.message : String(error)}`
@@ -86,8 +129,13 @@ export class CurrentAvatar extends SingletonAction<CurrentAvatarSettings> {
     }
 
     private async refreshAction(actionInstance: any, forceRefresh: boolean): Promise<void> {
+        const sequence = ++this.refreshSequence;
         try {
             const avatar = await vrchatAuth.getCurrentAvatar(forceRefresh);
+            if (sequence !== this.refreshSequence) {
+                return;
+            }
+            this.requestedAvatarId = avatar.id;
             await this.applyAvatar(actionInstance, avatar);
         } catch (error) {
             streamDeck.logger.warn(

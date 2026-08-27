@@ -1,12 +1,15 @@
 import streamDeck from "@elgato/streamdeck";
 import osc from "osc";
+import { DiscoveredService, OSCQueryDiscovery } from "oscquery";
 import { readdir, readFile, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
 
 type BooleanListener = (value: boolean) => void;
+type NumberListener = (value: number) => void;
 type OscValue = boolean | number | string;
 type ParameterListener = (name: string, value: OscValue) => void;
+type AvatarListener = (avatarId: string) => void;
 export type ParameterType = "bool" | "int" | "float";
 
 class VrchatOscClient {
@@ -15,11 +18,16 @@ class VrchatOscClient {
 
     private muteSelfListeners = new Set<BooleanListener>();
     private parameterListeners = new Set<ParameterListener>();
+    private avatarListeners = new Set<AvatarListener>();
+    private eyeHeightListeners = new Set<NumberListener>();
     private parameterValues = new Map<string, OscValue>();
     private parameterTypes = new Map<string, ParameterType>();
     private parameterLabels = new Map<string, string>();
     private currentAvatarId: string | undefined;
     private muteSelf: boolean | undefined;
+    private eyeHeight: number | undefined;
+    private readonly oscQuery = new OSCQueryDiscovery();
+    private oscQueryStarted = false;
 
     constructor() {
         this.sender = new osc.UDPPort({
@@ -43,6 +51,7 @@ class VrchatOscClient {
         this.receiver.on("ready", () => {
             streamDeck.logger.info("[OSC RECEIVE] Listening on 127.0.0.1:9001");
             void this.loadMostRecentAvatarParameters();
+            this.startOscQueryDiscovery();
         });
 
         this.receiver.on("message", (message: any) => {
@@ -61,6 +70,98 @@ class VrchatOscClient {
         this.receiver.open();
     }
 
+    private startOscQueryDiscovery(): void {
+        if (this.oscQueryStarted) {
+            return;
+        }
+        this.oscQueryStarted = true;
+
+        this.oscQuery.on("up", (service: DiscoveredService) => {
+            if (this.isVrchatOscQueryService(service)) {
+                streamDeck.logger.info(
+                    `[OSCQUERY] Found VRChat at ${service.address}:${service.port}`
+                );
+                void this.readEyeHeightFromService(service);
+            }
+        });
+        this.oscQuery.on("error", (error: unknown) => {
+            streamDeck.logger.warn(
+                `[OSCQUERY] Discovery error: ${error instanceof Error ? error.message : String(error)}`
+            );
+        });
+        this.oscQuery.start();
+
+        // VRChat normally uses TCP 9001 for OSCQuery. Querying it directly
+        // gives us an immediate value while mDNS discovery runs in parallel.
+        void this.oscQuery.queryNewService("127.0.0.1", 9001)
+            .then((service) => {
+                if (this.isVrchatOscQueryService(service)) {
+                    return this.readEyeHeightFromService(service);
+                }
+            })
+            .catch(() => undefined);
+    }
+
+    private isVrchatOscQueryService(service: DiscoveredService): boolean {
+        const name = String(service.hostInfo?.name ?? "").toLowerCase();
+        return name.includes("vrchat");
+    }
+
+    private async readEyeHeightFromService(service: DiscoveredService): Promise<number | undefined> {
+        try {
+            await service.update();
+            const rawValue = service.resolvePath("/avatar/eyeheight")?.getValue(0);
+            const value = Number(rawValue);
+            if (!Number.isFinite(value)) {
+                return undefined;
+            }
+            this.updateEyeHeight(value);
+            streamDeck.logger.info(`[OSCQUERY] Current eye height = ${value}`);
+            return value;
+        } catch (error) {
+            streamDeck.logger.warn(
+                `[OSCQUERY] Eye height query failed: ${error instanceof Error ? error.message : String(error)}`
+            );
+            return undefined;
+        }
+    }
+
+    async refreshEyeHeight(): Promise<number | undefined> {
+        this.startOscQueryDiscovery();
+        const vrchatServices = this.oscQuery.getServices().filter((service) =>
+            this.isVrchatOscQueryService(service)
+        );
+        for (const service of vrchatServices) {
+            const height = await this.readEyeHeightFromService(service);
+            if (height !== undefined) {
+                return height;
+            }
+        }
+
+        try {
+            const service = await this.oscQuery.queryNewService("127.0.0.1", 9001);
+            if (this.isVrchatOscQueryService(service)) {
+                return await this.readEyeHeightFromService(service);
+            }
+        } catch {
+            // VRChat may not be running yet; mDNS will notify us when it starts.
+        }
+        return this.eyeHeight;
+    }
+
+    private updateEyeHeight(value: number): void {
+        this.eyeHeight = value;
+        for (const listener of this.eyeHeightListeners) {
+            try {
+                listener(value);
+            } catch (error) {
+                streamDeck.logger.error(
+                    `[OSC] Eye height listener failed: ${error instanceof Error ? error.stack ?? error.message : String(error)}`
+                );
+            }
+        }
+    }
+
     private handleMessage(message: any): void {
         const parameterPrefix = "/avatar/parameters/";
 
@@ -77,7 +178,28 @@ class VrchatOscClient {
             streamDeck.logger.info("[OSC] Avatar changed; cleared expression parameter cache");
 
             if (this.currentAvatarId) {
+                for (const listener of this.avatarListeners) {
+                    try {
+                        listener(this.currentAvatarId);
+                    } catch (error) {
+                        streamDeck.logger.error(
+                            `[OSC] Avatar listener failed: ${error instanceof Error ? error.stack ?? error.message : String(error)}`
+                        );
+                    }
+                }
                 void this.loadAvatarParameters(this.currentAvatarId);
+            }
+            return;
+        }
+
+        if (message.address === "/avatar/eyeheight") {
+            const argument = message.args?.[0];
+            const rawValue = typeof argument === "object" && argument !== null
+                ? argument.value
+                : argument;
+            const value = Number(rawValue);
+            if (Number.isFinite(value)) {
+                this.updateEyeHeight(value);
             }
             return;
         }
@@ -168,6 +290,27 @@ class VrchatOscClient {
         return () => {
             this.parameterListeners.delete(listener);
         };
+    }
+
+    onAvatarChanged(listener: AvatarListener): () => void {
+        this.avatarListeners.add(listener);
+        return () => {
+            this.avatarListeners.delete(listener);
+        };
+    }
+
+    onEyeHeightChanged(listener: NumberListener): () => void {
+        this.eyeHeightListeners.add(listener);
+        if (this.eyeHeight !== undefined) {
+            listener(this.eyeHeight);
+        }
+        return () => {
+            this.eyeHeightListeners.delete(listener);
+        };
+    }
+
+    getEyeHeight(): number | undefined {
+        return this.eyeHeight;
     }
 
     getParameterValue(name: string): OscValue | undefined {
@@ -358,6 +501,13 @@ class VrchatOscClient {
         this.sender.send({
             address,
             args: [{ type: "i", value }]
+        });
+    }
+
+    sendFloat(address: string, value: number): void {
+        this.sender.send({
+            address,
+            args: [{ type: "f", value }]
         });
     }
 

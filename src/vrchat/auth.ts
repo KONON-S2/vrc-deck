@@ -226,6 +226,14 @@ class VrchatAuth {
             throw new Error("Current avatar was not found.");
         }
 
+        return await this.getAvatarById(avatarId);
+    }
+
+    async getAvatarById(avatarId: string): Promise<VrchatAvatar> {
+        if (!await this.restore()) {
+            throw new Error("VRChat login is required.");
+        }
+
         const response = await this.request(`/avatars/${encodeURIComponent(avatarId)}`);
         const avatar = await this.readJson<{
             id?: string;
@@ -239,8 +247,10 @@ class VrchatAuth {
             name: avatar.name ?? "Current Avatar",
             thumbnailImageUrl: avatar.thumbnailImageUrl
                 ?? avatar.imageUrl
-                ?? this.currentUser?.currentAvatarThumbnailImageUrl
-                ?? this.currentUser?.currentAvatarImageUrl
+                ?? (this.currentUser?.currentAvatar === avatarId
+                    ? this.currentUser.currentAvatarThumbnailImageUrl
+                        ?? this.currentUser.currentAvatarImageUrl
+                    : undefined)
                 ?? ""
         };
     }

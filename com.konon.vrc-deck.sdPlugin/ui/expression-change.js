@@ -1,6 +1,8 @@
 window.addEventListener("DOMContentLoaded", async () => {
     const valueInput = document.querySelector(".change-value");
     const slider = document.querySelector(".change-slider");
+    const repeatValueInput = document.querySelector(".repeat-value");
+    const repeatSlider = document.querySelector(".repeat-slider");
 
     if (!valueInput || !slider) {
         return;
@@ -53,5 +55,44 @@ window.addEventListener("DOMContentLoaded", async () => {
             ...current.settings,
             changeAmount: normalizedValue
         });
+    }
+
+    if (repeatValueInput && repeatSlider) {
+        const clampDelay = (value) => Math.max(20, Math.min(2000, Math.round(Number(value) || 250)));
+        let repeatSaveTimer;
+
+        const saveRepeatDelay = (value) => {
+            clearTimeout(repeatSaveTimer);
+            repeatSaveTimer = setTimeout(async () => {
+                const settings = await client.getSettings();
+                await client.setSettings({
+                    ...settings.settings,
+                    repeatDelay: value
+                });
+            }, 50);
+        };
+
+        repeatSlider.addEventListener("input", () => {
+            const value = clampDelay(repeatSlider.value);
+            repeatValueInput.value = String(value);
+            saveRepeatDelay(value);
+        });
+
+        repeatValueInput.addEventListener("change", () => {
+            const value = clampDelay(repeatValueInput.value);
+            repeatValueInput.value = String(value);
+            repeatSlider.value = String(value);
+            saveRepeatDelay(value);
+        });
+
+        repeatValueInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                repeatValueInput.blur();
+            }
+        });
+
+        const storedDelay = clampDelay(current.settings.repeatDelay ?? 250);
+        repeatValueInput.value = String(storedDelay);
+        repeatSlider.value = String(storedDelay);
     }
 });

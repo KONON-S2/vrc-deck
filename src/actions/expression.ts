@@ -5,22 +5,25 @@ import streamDeck, {
     KeyUpEvent,
     SendToPluginEvent,
     SingletonAction,
-    WillAppearEvent
+    WillAppearEvent,
+    WillDisappearEvent
 } from "@elgato/streamdeck";
 
 import { vrchatOsc } from "../osc/client";
 
 type ParameterType = "bool" | "int" | "float";
 type Operation = "toggle" | "button" | "cycle" | "increase" | "decrease";
-type ButtonMode = "hold" | "set";
+type BoolValue = "true" | "false";
 
 type ExpressionSettings = {
     parameterName?: string;
     parameterType?: ParameterType;
     buttonValue?: number;
-    buttonMode?: ButtonMode;
+    boolValue?: BoolValue;
     cycleMax?: number;
     changeAmount?: number;
+    repeatDelay?: number;
+    minimumZero?: boolean;
     trueTitle?: string;
     falseTitle?: string;
 };
@@ -29,6 +32,8 @@ abstract class ExpressionAction extends SingletonAction<ExpressionSettings> {
     private readonly parameterNames = new Map<any, string>();
     private readonly pressedToggleActions = new Set<any>();
     private readonly pendingToggleStates = new Map<any, boolean>();
+    private readonly repeatTimers = new Map<string, ReturnType<typeof setInterval>>();
+    private static readonly minimumLockedParameters = new Set<string>();
 
     constructor(private readonly operation: Operation) {
         super();
@@ -36,6 +41,13 @@ abstract class ExpressionAction extends SingletonAction<ExpressionSettings> {
         vrchatOsc.onParameterChanged((name, value) => {
             if (this.operation === "toggle") {
                 void this.updateMatchingButtons(name, value);
+            } else if (this.operation === "decrease") {
+                const numericValue = this.asNumber(value);
+                if (numericValue <= 0.000001) {
+                    ExpressionAction.minimumLockedParameters.add(name);
+                } else if (numericValue < 0.999999) {
+                    ExpressionAction.minimumLockedParameters.delete(name);
+                }
             }
         });
     }
@@ -56,6 +68,13 @@ abstract class ExpressionAction extends SingletonAction<ExpressionSettings> {
             await this.updateToggleTitles(ev.action, ev.payload.settings);
             await this.applyCurrentState(ev.action, ev.payload.settings);
         }
+    }
+
+    override onWillDisappear(ev: WillDisappearEvent<ExpressionSettings>): void {
+        this.stopRepeat(ev.action);
+        this.parameterNames.delete(ev.action);
+        this.pressedToggleActions.delete(ev.action);
+        this.pendingToggleStates.delete(ev.action);
     }
 
     override async onSendToPlugin(
@@ -99,7 +118,12 @@ abstract class ExpressionAction extends SingletonAction<ExpressionSettings> {
                 break;
             }
             case "button":
-                this.sendValue(settings, settings.buttonValue);
+                this.sendValue(
+                    settings,
+                    this.parameterTypeFor(settings) === "bool"
+                        ? settings.boolValue === "true" ? 1 : 0
+                        : settings.buttonValue
+                );
                 break;
             case "cycle": {
                 const max = Math.max(0, Math.trunc(settings.cycleMax));
@@ -108,23 +132,17 @@ abstract class ExpressionAction extends SingletonAction<ExpressionSettings> {
                 break;
             }
             case "increase":
-                this.sendValue(settings, current + this.stepFor(settings));
+                this.startRepeat(ev.action, settings, current, 1);
                 break;
             case "decrease":
-                this.sendValue(settings, current - this.stepFor(settings));
+                this.startRepeat(ev.action, settings, current, -1);
                 break;
         }
     }
 
     override async onKeyUp(ev: KeyUpEvent<ExpressionSettings>): Promise<void> {
-        const settings = this.withDefaults(ev.payload.settings);
-
-        if (
-            this.operation === "button" &&
-            settings.buttonMode === "hold" &&
-            settings.parameterName
-        ) {
-            this.sendValue(settings, 0);
+        if (this.operation === "increase" || this.operation === "decrease") {
+            this.stopRepeat(ev.action);
         }
 
         if (this.operation === "toggle") {
@@ -149,9 +167,11 @@ abstract class ExpressionAction extends SingletonAction<ExpressionSettings> {
             parameterName: settings.parameterName?.trim() ?? "",
             parameterType: settings.parameterType ?? "bool",
             buttonValue: Number(settings.buttonValue ?? 1),
-            buttonMode: settings.buttonMode ?? "set",
+            boolValue: settings.boolValue ?? "true",
             cycleMax: Number(settings.cycleMax ?? 7),
             changeAmount,
+            repeatDelay: Math.max(20, Math.min(2000, Math.round(Number(settings.repeatDelay ?? 250)))),
+            minimumZero: settings.minimumZero !== false,
             trueTitle: settings.trueTitle?.trim() ?? "",
             falseTitle: settings.falseTitle?.trim() ?? ""
         };
@@ -159,22 +179,88 @@ abstract class ExpressionAction extends SingletonAction<ExpressionSettings> {
 
     private sendValue(settings: Required<ExpressionSettings>, value: number): void {
         const address = `/avatar/parameters/${settings.parameterName}`;
-        const parameterType = vrchatOsc.getParameterType(settings.parameterName)
-            ?? settings.parameterType;
+        const parameterType = this.parameterTypeFor(settings);
 
         if (parameterType === "bool") {
             vrchatOsc.send(address, value !== 0);
         } else if (parameterType === "int") {
             vrchatOsc.send(address, Math.max(0, Math.min(255, Math.trunc(value))));
         } else {
-            vrchatOsc.send(address, Math.max(-1, Math.min(1, value)));
+            vrchatOsc.sendFloat(address, Math.max(-1, Math.min(1, value)));
+        }
+    }
+
+    private parameterTypeFor(settings: Required<ExpressionSettings>): ParameterType {
+        if (settings.parameterType === "float") {
+            return "float";
+        }
+        return vrchatOsc.getParameterType(settings.parameterName) ?? settings.parameterType;
+    }
+
+    private startRepeat(
+        actionInstance: any,
+        settings: Required<ExpressionSettings>,
+        current: number,
+        direction: 1 | -1
+    ): void {
+        this.stopRepeat(actionInstance);
+
+        if (direction === 1) {
+            ExpressionAction.minimumLockedParameters.delete(settings.parameterName);
+        }
+
+        if (direction === -1) {
+            if (!settings.minimumZero) {
+                ExpressionAction.minimumLockedParameters.delete(settings.parameterName);
+            } else if (
+                current <= 0.000001 ||
+                ExpressionAction.minimumLockedParameters.has(settings.parameterName)
+            ) {
+                ExpressionAction.minimumLockedParameters.add(settings.parameterName);
+                return;
+            }
+        }
+
+        const step = this.stepFor(settings) * direction;
+        const applyMinimum = (value: number) => direction === -1 && settings.minimumZero
+            ? Math.max(0, value)
+            : value;
+        let next = applyMinimum(current + step);
+        if (direction === -1 && settings.minimumZero && next <= 0.000001) {
+            next = 0;
+            ExpressionAction.minimumLockedParameters.add(settings.parameterName);
+        }
+        this.sendValue(settings, next);
+
+        if (direction === -1 && settings.minimumZero && next <= 0) {
+            return;
+        }
+
+        const timer = setInterval(() => {
+            next = applyMinimum(next + step);
+            if (direction === -1 && settings.minimumZero && next <= 0.000001) {
+                next = 0;
+                ExpressionAction.minimumLockedParameters.add(settings.parameterName);
+            }
+            this.sendValue(settings, next);
+            if (direction === -1 && settings.minimumZero && next <= 0) {
+                this.stopRepeat(actionInstance);
+            }
+        }, settings.repeatDelay);
+        this.repeatTimers.set(actionInstance.id, timer);
+    }
+
+    private stopRepeat(actionInstance: any): void {
+        const timer = this.repeatTimers.get(actionInstance.id);
+        if (timer) {
+            clearInterval(timer);
+            this.repeatTimers.delete(actionInstance.id);
         }
     }
 
     private stepFor(settings: Required<ExpressionSettings>): number {
         const amount = Math.max(0, Math.min(1, settings.changeAmount));
-        const parameterType = vrchatOsc.getParameterType(settings.parameterName)
-            ?? settings.parameterType;
+        const parameterType = this.parameterTypeFor(settings);
         return parameterType === "float" ? amount : amount * 100;
     }
 

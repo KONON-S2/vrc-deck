@@ -4,9 +4,9 @@
 <body>
 <sdpi-item label="Parameter"><input data-expression-parameter list="expression-parameter-options" placeholder="Search parameters..." autocomplete="off" /></sdpi-item>
 <datalist id="expression-parameter-options"></datalist>
-<sdpi-item label="Value"><sdpi-textfield setting="buttonValue" type="number" default="1"></sdpi-textfield></sdpi-item>
-<sdpi-item label="Behavior"><sdpi-select setting="buttonMode" default="set">
-<option value="set">Set (Keep Value)</option><option value="hold">Hold (Reset to 0)</option>
+<sdpi-item label="Value"><sdpi-textfield data-expression-number-value setting="buttonValue" type="number" default="1"></sdpi-textfield></sdpi-item>
+<sdpi-item label="Bool Value"><sdpi-select data-expression-bool-value setting="boolValue" default="true" disabled>
+<option value="true">True</option><option value="false">False</option>
 </sdpi-select></sdpi-item>
 <script src="expression-parameters.js"></script>
 </body></html>

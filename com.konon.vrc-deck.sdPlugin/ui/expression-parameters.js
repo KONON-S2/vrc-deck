@@ -1,5 +1,9 @@
 window.addEventListener("DOMContentLoaded", async () => {
     const input = document.querySelector("[data-expression-parameter]");
+    const boolValueControl = document.querySelector("[data-expression-bool-value]");
+    const boolValueItem = boolValueControl?.closest("sdpi-item");
+    const numberValueControl = document.querySelector("[data-expression-number-value]");
+    const numberValueItem = numberValueControl?.closest("sdpi-item");
 
     if (!input) {
         return;
@@ -64,6 +68,27 @@ window.addEventListener("DOMContentLoaded", async () => {
         typeInfo.textContent = parameter
             ? `Type: ${String(parameter.type).toUpperCase()}`
             : "Type: Not selected";
+
+        if (boolValueControl) {
+            const isBool = parameter?.type === "bool";
+            const isNumber = parameter?.type === "int" || parameter?.type === "float";
+            boolValueControl.disabled = !isBool;
+            boolValueControl.toggleAttribute("disabled", !isBool);
+            if (boolValueItem) {
+                boolValueItem.style.opacity = isBool ? "1" : ".38";
+                boolValueItem.style.pointerEvents = isBool ? "auto" : "none";
+            }
+
+            if (numberValueControl) {
+                numberValueControl.disabled = !isNumber;
+                numberValueControl.toggleAttribute("disabled", !isNumber);
+            }
+            if (numberValueItem) {
+                numberValueItem.style.opacity = isNumber ? "1" : ".38";
+                numberValueItem.style.pointerEvents = isNumber ? "auto" : "none";
+            }
+
+        }
     };
 
     const saveSelection = async (parameter) => {
