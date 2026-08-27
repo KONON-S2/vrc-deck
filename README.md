@@ -6,6 +6,10 @@
   Control and monitor VRChat from your Stream Deck using OSC and the VRChat API.
 </div>
 
+<div align="center">
+  English | <a href="README_KO.md">한국어</a>
+</div>
+
 > VRC Deck is an unofficial community project. It is not affiliated with or endorsed by VRChat Inc. or Elgato.
 
 ## Features
