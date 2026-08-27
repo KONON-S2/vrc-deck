@@ -12,6 +12,20 @@
 
 > VRC Deck is an unofficial community project. It is not affiliated with or endorsed by VRChat Inc. or Elgato.
 
+## Preview
+
+### Stream Deck actions
+
+<img src="docs/images/stream-deck-actions.png" width="100%" alt="VRC Deck actions configured on a Stream Deck">
+
+### Expression controls
+
+<img src="docs/images/expression-settings.png" width="100%" alt="Expression parameter configuration in the Stream Deck Property Inspector">
+
+### Available actions
+
+<img src="docs/images/action-list.png" width="100%" alt="VRC Deck action list in the Stream Deck app">
+
 ## Features
 
 | Action | Description | VRC Login |

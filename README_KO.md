@@ -12,6 +12,20 @@
 
 > VRC Deck은 비공식 커뮤니티 프로젝트이며 VRChat Inc. 또는 Elgato와 제휴하거나 공식 승인을 받은 제품이 아닙니다.
 
+## 미리 보기
+
+### Stream Deck 액션
+
+<img src="docs/images/stream-deck-actions.png" width="100%" alt="Stream Deck에 구성한 VRC Deck 액션">
+
+### Expression 제어
+
+<img src="docs/images/expression-settings.png" width="100%" alt="Stream Deck Property Inspector의 Expression 파라미터 설정 화면">
+
+### 사용 가능한 액션
+
+<img src="docs/images/action-list.png" width="100%" alt="Stream Deck 앱의 VRC Deck 액션 목록">
+
 ## 기능
 
 | 액션 | 설명 | VRC 로그인 |
