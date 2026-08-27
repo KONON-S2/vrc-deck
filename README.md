@@ -125,6 +125,6 @@ If you enjoy VRC Deck and would like to support its development, you can [buy me
 
 ## License
 
-VRC Deck source code is available under the [MIT License](LICENSE).
+Copyright (C) 2026 KONON. VRC Deck is free software licensed under the [GNU General Public License v3.0 only](LICENSE) (`GPL-3.0-only`). If you distribute VRC Deck or a modified version, you must comply with the GPL, including providing the corresponding source code under the same license.
 
 Lucide icons and other third-party materials remain subject to their respective licenses. VRChat names, logos, and trademarks belong to VRChat Inc. See the included notice files for details.

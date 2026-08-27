@@ -125,6 +125,6 @@ VRC Deck이 마음에 들고 개발을 후원하고 싶다면 [Buy Me a Coffee](
 
 ## 라이선스
 
-VRC Deck 소스 코드는 [MIT License](LICENSE)에 따라 공개됩니다.
+Copyright (C) 2026 KONON. VRC Deck은 [GNU General Public License v3.0 전용](LICENSE)(`GPL-3.0-only`)으로 배포되는 자유 소프트웨어입니다. VRC Deck 또는 수정 버전을 배포할 경우, 동일한 라이선스로 해당 소스 코드를 제공하는 것을 포함하여 GPL 조건을 준수해야 합니다.
 
 Lucide 아이콘 및 기타 제3자 자료에는 각각의 라이선스가 적용됩니다. VRChat 명칭, 로고 및 상표의 권리는 VRChat Inc.에 있습니다. 자세한 내용은 저장소에 포함된 고지 파일을 확인하세요.

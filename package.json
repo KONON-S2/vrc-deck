@@ -4,7 +4,7 @@
         "watch": "rollup -c -w --watch.onEnd=\"streamdeck restart com.konon.vrc-deck\""
     },
     "type": "module",
-    "license": "MIT",
+    "license": "GPL-3.0-only",
     "devDependencies": {
         "@elgato/cli": "^1.9.0",
         "@rollup/plugin-commonjs": "^29.0.2",
