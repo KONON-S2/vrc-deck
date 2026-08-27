@@ -7,7 +7,7 @@
 </div>
 
 <div align="center">
-  English | <a href="README_KO.md">한국어</a>
+  English | <a href="README_KO.md">한국어</a> | <a href="README_JA.md">日本語</a>
 </div>
 
 > VRC Deck is an unofficial community project. It is not affiliated with or endorsed by VRChat Inc. or Elgato.
