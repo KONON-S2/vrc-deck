@@ -1,6 +1,6 @@
 {
     "Name": "VRC Deck",
-    "Version": "1.2.1.0",
+    "Version": "1.2.2.0",
     "Author": "KONON",
     "Actions": [
         {
@@ -30,7 +30,7 @@
         {
             "Name": "AFK Status",
             "UUID": "com.konon.vrc-deck.afk-toggle",
-            "Icon": "imgs/actions/counter/icon",
+            "Icon": "imgs/actions/afk-status/bubbles-list",
             "Tooltip": "Display the current VRChat AFK state.",
             "PropertyInspectorPath": "ui/afk-status.html",
             "Controllers": [
