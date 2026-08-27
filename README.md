@@ -14,20 +14,20 @@
 | --- | --- | :---: |
 | Mic Toggle | Toggle the microphone and synchronize its current state in real time. | No |
 | AFK Status | Display the current VRChat AFK state. | No |
-| VRC Login | Sign in for actions that use the VRChat API. | — |
-| Instance Status | Display player count or world name with an optional world thumbnail. | Yes |
-| Avatar Change | Search your available avatars and switch to the selected avatar. | Yes |
-| Current Avatar | Display the name and thumbnail of the currently equipped avatar. | Yes |
 | Avatar Height Increase | Increase eye height once or continuously while the key is held. | No |
 | Avatar Height Decrease | Decrease eye height once or continuously while the key is held. | No |
 | Avatar Height Set | Set eye height directly to a configured value. | No |
-| Online Status | Cycle, toggle, or set your VRChat online status. | Yes |
 | Expression Toggle | Toggle a Bool avatar expression parameter. | No |
 | Expression Button | Set a Bool, Int, or Float expression parameter to a configured value. | No |
 | Expression Cycle | Cycle an Int expression parameter through a configured range. | No |
 | Expression Increase / Decrease | Adjust numeric expression parameters, including hold-to-repeat. | No |
 | Auto Chat | Send a saved message directly to the VRChat chatbox. | No |
 | Panic Button | Turn on VRChat Safe Mode. | No |
+| VRC Login | Sign in for actions that use the VRChat API. | — |
+| Instance Status | Display player count or world name with an optional world thumbnail. | Yes |
+| Avatar Change | Search your available avatars and switch to the selected avatar. | Yes |
+| Current Avatar | Display the name and thumbnail of the currently equipped avatar. | Yes |
+| Online Status | Cycle, toggle, or set your VRChat online status. | Yes |
 
 ## Requirements
 
