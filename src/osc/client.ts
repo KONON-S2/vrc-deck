@@ -26,6 +26,9 @@ class VrchatOscClient {
     private currentAvatarId: string | undefined;
     private muteSelf: boolean | undefined;
     private eyeHeight: number | undefined;
+    private eyeHeightScalingAllowed: boolean | undefined;
+    private readonly eyeHeightResyncTimers = new Set<ReturnType<typeof setTimeout>>();
+    private readonly eyeHeightVerificationTimers = new Set<ReturnType<typeof setTimeout>>();
     private readonly oscQuery = new OSCQueryDiscovery();
     private oscQueryStarted = false;
 
@@ -110,6 +113,12 @@ class VrchatOscClient {
     private async readEyeHeightFromService(service: DiscoveredService): Promise<number | undefined> {
         try {
             await service.update();
+            const rawAllowed = service.resolvePath("/avatar/eyeheightscalingallowed")?.getValue(0);
+            if (typeof rawAllowed === "boolean") {
+                this.eyeHeightScalingAllowed = rawAllowed;
+            } else if (typeof rawAllowed === "number") {
+                this.eyeHeightScalingAllowed = rawAllowed !== 0;
+            }
             const rawValue = service.resolvePath("/avatar/eyeheight")?.getValue(0);
             const value = Number(rawValue);
             if (!Number.isFinite(value)) {
@@ -146,7 +155,7 @@ class VrchatOscClient {
         } catch {
             // VRChat may not be running yet; mDNS will notify us when it starts.
         }
-        return this.eyeHeight;
+        return undefined;
     }
 
     private updateEyeHeight(value: number): void {
@@ -175,6 +184,7 @@ class VrchatOscClient {
             this.parameterTypes.clear();
             this.parameterLabels.clear();
             this.currentAvatarId = typeof avatarId === "string" ? avatarId : undefined;
+            this.resyncEyeHeight();
             streamDeck.logger.info("[OSC] Avatar changed; cleared expression parameter cache");
 
             if (this.currentAvatarId) {
@@ -200,6 +210,19 @@ class VrchatOscClient {
             const value = Number(rawValue);
             if (Number.isFinite(value)) {
                 this.updateEyeHeight(value);
+            }
+            return;
+        }
+
+        if (message.address === "/avatar/eyeheightscalingallowed") {
+            const argument = message.args?.[0];
+            const rawValue = typeof argument === "object" && argument !== null
+                ? argument.value
+                : argument;
+            if (typeof rawValue === "boolean") {
+                this.eyeHeightScalingAllowed = rawValue;
+            } else if (typeof rawValue === "number") {
+                this.eyeHeightScalingAllowed = rawValue !== 0;
             }
             return;
         }
@@ -311,6 +334,56 @@ class VrchatOscClient {
 
     getEyeHeight(): number | undefined {
         return this.eyeHeight;
+    }
+
+    isEyeHeightScalingAllowed(): boolean | undefined {
+        return this.eyeHeightScalingAllowed;
+    }
+
+    resyncEyeHeight(): void {
+        this.eyeHeight = undefined;
+        this.eyeHeightScalingAllowed = undefined;
+
+        for (const timer of this.eyeHeightResyncTimers) {
+            clearTimeout(timer);
+        }
+        this.eyeHeightResyncTimers.clear();
+        this.clearEyeHeightVerificationTimers();
+
+        for (const delay of [750, 2500, 6000]) {
+            const timer = setTimeout(() => {
+                this.eyeHeightResyncTimers.delete(timer);
+                void this.refreshEyeHeight();
+            }, delay);
+            this.eyeHeightResyncTimers.add(timer);
+        }
+    }
+
+    setEyeHeight(height: number): boolean {
+        if (this.eyeHeightScalingAllowed === false) {
+            return false;
+        }
+
+        const value = Math.max(0.1, Math.min(100, Math.round(height * 100) / 100));
+        this.updateEyeHeight(value);
+        this.sendFloat("/avatar/eyeheight", value);
+
+        this.clearEyeHeightVerificationTimers();
+        for (const delay of [300, 1200]) {
+            const timer = setTimeout(() => {
+                this.eyeHeightVerificationTimers.delete(timer);
+                void this.refreshEyeHeight();
+            }, delay);
+            this.eyeHeightVerificationTimers.add(timer);
+        }
+        return true;
+    }
+
+    private clearEyeHeightVerificationTimers(): void {
+        for (const timer of this.eyeHeightVerificationTimers) {
+            clearTimeout(timer);
+        }
+        this.eyeHeightVerificationTimers.clear();
     }
 
     getParameterValue(name: string): OscValue | undefined {

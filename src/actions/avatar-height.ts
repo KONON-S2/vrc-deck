@@ -8,6 +8,7 @@ import {
 } from "@elgato/streamdeck";
 
 import { vrchatOsc } from "../osc/client";
+import { vrchatGameLog } from "../vrchat/game-log";
 
 type AvatarHeightSettings = {
     changeAmount?: number;
@@ -21,6 +22,12 @@ type AvatarHeightSetSettings = {
 };
 
 let lastKnownEyeHeight: number | undefined;
+
+vrchatGameLog.onInstanceActivity((activity) => {
+    if (activity.type === "location") {
+        vrchatOsc.resyncEyeHeight();
+    }
+});
 
 abstract class AvatarHeightAction extends SingletonAction<AvatarHeightSettings> {
     private readonly repeatTimers = new Map<string, ReturnType<typeof setInterval>>();
@@ -45,8 +52,17 @@ abstract class AvatarHeightAction extends SingletonAction<AvatarHeightSettings> 
     }
 
     override async onKeyDown(ev: KeyDownEvent<AvatarHeightSettings>): Promise<void> {
+        if (vrchatOsc.isEyeHeightScalingAllowed() === false) {
+            await vrchatOsc.refreshEyeHeight();
+            if (vrchatOsc.isEyeHeightScalingAllowed() === false) {
+                await ev.action.showAlert();
+                return;
+            }
+        }
+
         const savedHeight = Number(ev.payload.settings.lastKnownHeight);
         const height = vrchatOsc.getEyeHeight()
+            ?? await vrchatOsc.refreshEyeHeight()
             ?? lastKnownEyeHeight
             ?? this.currentHeight
             ?? (Number.isFinite(savedHeight) ? savedHeight : undefined);
@@ -71,7 +87,10 @@ abstract class AvatarHeightAction extends SingletonAction<AvatarHeightSettings> 
         if (next === height) {
             return;
         }
-        this.sendHeight(next);
+        if (!this.sendHeight(next)) {
+            await ev.action.showAlert();
+            return;
+        }
 
         const timer = setInterval(() => {
             const changed = this.nextHeight(next, amount, heightLimit);
@@ -80,7 +99,9 @@ abstract class AvatarHeightAction extends SingletonAction<AvatarHeightSettings> 
                 return;
             }
             next = changed;
-            this.sendHeight(next);
+            if (!this.sendHeight(next)) {
+                this.stopRepeat(ev.action.id);
+            }
         }, repeatDelay);
         this.repeatTimers.set(ev.action.id, timer);
     }
@@ -93,11 +114,14 @@ abstract class AvatarHeightAction extends SingletonAction<AvatarHeightSettings> 
         this.stopRepeat(ev.action.id);
     }
 
-    private sendHeight(height: number): void {
+    private sendHeight(height: number): boolean {
+        if (!vrchatOsc.setEyeHeight(height)) {
+            return false;
+        }
         this.currentHeight = height;
         lastKnownEyeHeight = height;
         void this.persistHeight(height);
-        vrchatOsc.sendFloat("/avatar/eyeheight", height);
+        return true;
     }
 
     private async persistHeight(height: number): Promise<void> {
@@ -153,14 +177,16 @@ export class AvatarHeightDecrease extends AvatarHeightAction {
 
 @action({ UUID: "com.konon.vrc-deck.avatar-height-set" })
 export class AvatarHeightSet extends SingletonAction<AvatarHeightSetSettings> {
-    override onKeyDown(ev: KeyDownEvent<AvatarHeightSetSettings>): void {
+    override async onKeyDown(ev: KeyDownEvent<AvatarHeightSetSettings>): Promise<void> {
         const targetHeight = Math.max(
             0.1,
             Math.min(100, Number(ev.payload.settings.targetHeight ?? 1.6))
         );
-        vrchatOsc.sendFloat(
-            "/avatar/eyeheight",
-            Math.round(targetHeight * 100) / 100
-        );
+        if (!vrchatOsc.setEyeHeight(targetHeight)) {
+            await vrchatOsc.refreshEyeHeight();
+            if (!vrchatOsc.setEyeHeight(targetHeight)) {
+                await ev.action.showAlert();
+            }
+        }
     }
 }
